@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PuntoVenta.Database.Entidades;
 
 namespace PuntoVenta.Database
 {
-    public class DataContext : DbContext
+    public class DataContext : IdentityDbContext<User>
     {
         // 
         public DataContext(DbContextOptions options) : base(options)

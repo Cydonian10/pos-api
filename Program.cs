@@ -1,5 +1,10 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using PuntoVenta.Database;
+using PuntoVenta.Database.Entidades;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +24,25 @@ builder.Services.AddDbContext<DataContext>((options) =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+// * Identity
+builder.Services.AddIdentity<User, IdentityRole>()
+        .AddEntityFrameworkStores<DataContext>()
+        .AddDefaultTokenProviders();
+
 var app = builder.Build();
+
+// * Token
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(opciones => opciones.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                                  Encoding.UTF8.GetBytes(builder.Configuration["llavejwt"]!)),
+            ClockSkew = TimeSpan.Zero
+        });
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
