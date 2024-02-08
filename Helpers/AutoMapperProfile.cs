@@ -8,6 +8,11 @@ namespace PuntoVenta.Helpers
     {
         public AutoMapperProfile()
         {
+
+            // * Usuarios
+
+            CreateMap<AuthRegisterDto, User>();
+
             // * Products
 
             CreateMap<ProductoCrearDto, Product>()

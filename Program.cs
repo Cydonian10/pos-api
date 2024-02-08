@@ -1,9 +1,13 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using PuntoVenta.Database;
 using PuntoVenta.Database.Entidades;
+using PuntoVenta.Policies;
+using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +19,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
 
@@ -24,12 +29,18 @@ builder.Services.AddDbContext<DataContext>((options) =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+// * Services
+//builder.Services.AddSingleton<IAuthorizationHandler,EmployedHandler>();
+builder.Services.AddHttpContextAccessor();
+
+
 // * Identity
 builder.Services.AddIdentity<User, IdentityRole>()
         .AddEntityFrameworkStores<DataContext>()
         .AddDefaultTokenProviders();
 
-var app = builder.Build();
+JsonWebTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
 
 // * Token
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -43,6 +54,29 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                                   Encoding.UTF8.GetBytes(builder.Configuration["llavejwt"]!)),
             ClockSkew = TimeSpan.Zero
         });
+
+
+
+
+builder.Services.AddAuthorization(options =>
+{
+ 
+    options.AddPolicy(
+        "ManejadorProductos",
+        policy => 
+            policy
+            .RequireClaim(ClaimTypes.Role, ["Admin","Empleado"])
+        );
+
+    options.AddPolicy(
+        "NivelAccesoTotal",
+        policy => 
+            policy
+            .RequireClaim("NiveAcceso", ["100"])
+        );
+});
+
+var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

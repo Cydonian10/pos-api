@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +13,7 @@ namespace PuntoVenta.Controllers
 {
     [Route("api/products")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ProductController : CustomBaseController
     {
         private readonly DataContext context;
@@ -32,6 +35,8 @@ namespace PuntoVenta.Controllers
             return productoDto!;
         }
 
+        [Authorize(Policy = "ManejadorProductos")]
+        [Authorize(Policy = "NivelAccesoTotal")]
         [HttpGet()]
         public async Task<ActionResult<List<ProductDto>>> ListPaginada([FromQuery] PageDto pageDto)
         {
