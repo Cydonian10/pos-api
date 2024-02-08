@@ -1,10 +1,9 @@
-﻿namespace PuntoVenta.Database.Entidades
+﻿namespace PuntoVenta.Dtos
 {
-    public class Category : IId
+    public class CategoryDto
     {
         public int Id { get; set; }
         public string? Name { get; set; }
         public string? Description { get; set; }
-        public List<ProductName>? ProductNames { get; set; }
     }
 }

@@ -6,7 +6,6 @@ using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using PuntoVenta.Database;
 using PuntoVenta.Database.Entidades;
-using PuntoVenta.Policies;
 using System.Security.Claims;
 using System.Text;
 

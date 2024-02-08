@@ -155,6 +155,25 @@ namespace PuntoVenta.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("PuntoVenta.Database.Entidades.Category", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Categories", (string)null);
+                });
+
             modelBuilder.Entity("PuntoVenta.Database.Entidades.Product", b =>
                 {
                     b.Property<int>("Id")
@@ -205,10 +224,15 @@ namespace PuntoVenta.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
 
                     b.ToTable("ProductNames", (string)null);
                 });
@@ -342,6 +366,22 @@ namespace PuntoVenta.Migrations
                         .HasForeignKey("ProductNameId");
 
                     b.Navigation("ProductName");
+                });
+
+            modelBuilder.Entity("PuntoVenta.Database.Entidades.ProductName", b =>
+                {
+                    b.HasOne("PuntoVenta.Database.Entidades.Category", "Category")
+                        .WithMany("ProductNames")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("PuntoVenta.Database.Entidades.Category", b =>
+                {
+                    b.Navigation("ProductNames");
                 });
 
             modelBuilder.Entity("PuntoVenta.Database.Entidades.ProductName", b =>

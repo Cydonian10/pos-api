@@ -12,6 +12,7 @@ namespace PuntoVenta.Helpers
             // * Usuarios
 
             CreateMap<AuthRegisterDto, User>();
+            CreateMap<User, UserDto>();
 
             // * Products
 
@@ -20,13 +21,22 @@ namespace PuntoVenta.Helpers
                     .ForMember(dest => dest.ProductName, opt => opt.MapFrom(MapProduNameDtoProductName));
 
             CreateMap<Product, ProductDto>()
-                    .ForMember(dest => dest.Name, opt => opt.MapFrom(MapProductNameFromName));
+                    .ForMember(dest => dest.Detalle, opt => opt.MapFrom(MapProductNameFromName));
+
+            // * Categorias
+
+            CreateMap<CategoryCrearDto, Category>();
+            CreateMap<Category, CategoryDto>();
 
         }
 
-        private string? MapProductNameFromName(Product product, ProductDto dto)
+        private ProductNameDto? MapProductNameFromName(Product product, ProductDto dto)
         {
-            var resultado = product.ProductName?.Name;
+            var resultado = new ProductNameDto();
+
+            resultado.Name = product.ProductName?.Name;
+            resultado.Category = product.ProductName!.Category!.Name;
+
             if (resultado == null) { return null; }
             return resultado;
         }
@@ -36,6 +46,7 @@ namespace PuntoVenta.Helpers
             var resultado = new ProductName();
             if (productoCrearDto.Name == null) { return null; }
             resultado.Name = productoCrearDto.Name;
+            resultado.CategoryId = productoCrearDto.CategoryId;
             return resultado;
         }
     }

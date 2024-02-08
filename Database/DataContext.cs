@@ -13,6 +13,7 @@ namespace PuntoVenta.Database
 
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductName> ProductNames {  get; set; }
+        public DbSet<Category> Categories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -28,6 +29,14 @@ namespace PuntoVenta.Database
             modelBuilder.Entity<ProductName>(e =>
             {
                 e.ToTable("ProductNames");
+                e.HasKey("Id");
+
+                e.HasOne(e => e.Category).WithMany(e => e.ProductNames).HasForeignKey(e => e.CategoryId);
+            });
+
+            modelBuilder.Entity<Category>(e =>
+            {
+                e.ToTable("Categories");
                 e.HasKey("Id");
             });
 

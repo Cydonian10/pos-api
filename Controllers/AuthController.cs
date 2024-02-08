@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +8,6 @@ using Microsoft.IdentityModel.Tokens;
 using PuntoVenta.Database;
 using PuntoVenta.Database.Entidades;
 using PuntoVenta.Dtos;
-using PuntoVenta.Migrations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -197,12 +195,20 @@ namespace PuntoVenta.Controllers
             
             var usuarioDb = await context.Users.FirstOrDefaultAsync();
 
+            var userDto = mapper.Map<UserDto>(usuarioDb);
+
             var roles = await userManager.GetRolesAsync(usuarioDb!);
 
             var claims = await userManager.GetClaimsAsync(usuarioDb!);
-            
 
-            return Ok( new {Usuario = usuarioDb, Roles = roles, Claims = claims});
+            var claimsDto = new List<ClaimsDto>();
+
+            foreach (var claim in claims)
+            {
+                claimsDto.Add(new ClaimsDto { Typo = claim.Type, Value = claim.Value });
+            }
+            
+            return Ok( new {Usuario = userDto, Roles = roles, Claims = claimsDto });
         }
 
     }

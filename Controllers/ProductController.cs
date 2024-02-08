@@ -35,12 +35,12 @@ namespace PuntoVenta.Controllers
             return productoDto!;
         }
 
-        [Authorize(Policy = "ManejadorProductos")]
-        [Authorize(Policy = "NivelAccesoTotal")]
+        //[Authorize(Policy = "ManejadorProductos")]
+        //[Authorize(Policy = "NivelAccesoTotal")]
         [HttpGet()]
         public async Task<ActionResult<List<ProductDto>>> ListPaginada([FromQuery] PageDto pageDto)
         {
-            var queryble = context.Products.Include(e => e.ProductName).AsQueryable();
+            var queryble = context.Products.Include(e => e.ProductName).ThenInclude(e => e!.Category).AsQueryable();
             await HttpContext.InsertarParametrosPaginar(queryble, pageDto.quantityRecordsPerPage);
             var productsDb = await queryble.Paginar(pageDto).ToListAsync();
             var productDto = mapper.Map<List<ProductDto>>(productsDb);
