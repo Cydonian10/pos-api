@@ -14,6 +14,8 @@ namespace PuntoVenta.Database
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductName> ProductNames {  get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<Sale> Sales { get; set; }
+        public DbSet<SaleDetail> SaleDetails { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -21,7 +23,6 @@ namespace PuntoVenta.Database
             {
                 e.ToTable("Products");
                 e.HasKey("Id");
-
                 e.HasOne(e => e.ProductName).WithMany(e => e.Products).HasForeignKey(e => e.ProductNameId);
             });
 
@@ -30,7 +31,6 @@ namespace PuntoVenta.Database
             {
                 e.ToTable("ProductNames");
                 e.HasKey("Id");
-
                 e.HasOne(e => e.Category).WithMany(e => e.ProductNames).HasForeignKey(e => e.CategoryId);
             });
 
