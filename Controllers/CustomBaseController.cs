@@ -68,7 +68,6 @@ namespace PuntoVenta.Controllers
             await context.SaveChangesAsync();
 
             return NoContent();
-
         }
     }
 }

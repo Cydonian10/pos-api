@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PuntoVenta.Database;
 
@@ -11,9 +12,11 @@ using PuntoVenta.Database;
 namespace PuntoVenta.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240211192901_HistoryProduct")]
+    partial class HistoryProduct
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,8 +27,6 @@ namespace PuntoVenta.Migrations
 
             modelBuilder.HasSequence<int>("MiEntidad_Id_seq", "dbo")
                 .StartsAt(100L);
-
-            modelBuilder.HasSequence<int>("Purchase_Id_seq", "dbo");
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -160,34 +161,6 @@ namespace PuntoVenta.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("PuntoVenta.Database.Entidades.CashRegister", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal?>("InitialCash")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("Open")
-                        .HasColumnType("bit");
-
-                    b.Property<decimal?>("TotalCash")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("CashRegisters", (string)null);
-                });
-
             modelBuilder.Entity("PuntoVenta.Database.Entidades.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -207,36 +180,6 @@ namespace PuntoVenta.Migrations
                     b.ToTable("Categories", (string)null);
                 });
 
-            modelBuilder.Entity("PuntoVenta.Database.Entidades.HistoryCashRegister", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CashRegisterId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("EmployedId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("TotalCash")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmployedId");
-
-                    b.ToTable("HistoryCashRegisters", (string)null);
-                });
-
             modelBuilder.Entity("PuntoVenta.Database.Entidades.HistoryPriceProduct", b =>
                 {
                     b.Property<int>("Id")
@@ -246,6 +189,7 @@ namespace PuntoVenta.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("Date")
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("OldPrice")
@@ -310,67 +254,6 @@ namespace PuntoVenta.Migrations
                     b.HasIndex("UnitMeasurementId");
 
                     b.ToTable("Products", (string)null);
-                });
-
-            modelBuilder.Entity("PuntoVenta.Database.Entidades.Purchase", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("SupplierId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Taxes")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("VaucherNumber")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValueSql("next value for dbo.Purchase_Id_seq");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SupplierId");
-
-                    b.ToTable("Purchase", (string)null);
-                });
-
-            modelBuilder.Entity("PuntoVenta.Database.Entidades.PurchaseDetail", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PurchaseId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Quantity")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("SubTotal")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("PurchaseId");
-
-                    b.ToTable("PurchaseDetail", (string)null);
                 });
 
             modelBuilder.Entity("PuntoVenta.Database.Entidades.Sale", b =>
@@ -443,31 +326,6 @@ namespace PuntoVenta.Migrations
                     b.HasIndex("SaleId");
 
                     b.ToTable("SaleDetails", (string)null);
-                });
-
-            modelBuilder.Entity("PuntoVenta.Database.Entidades.Supplier", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Adress")
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<string>("Phone")
-                        .HasMaxLength(9)
-                        .HasColumnType("nvarchar(9)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Suppliers", (string)null);
                 });
 
             modelBuilder.Entity("PuntoVenta.Database.Entidades.UnitMeasurement", b =>
@@ -611,15 +469,6 @@ namespace PuntoVenta.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PuntoVenta.Database.Entidades.HistoryCashRegister", b =>
-                {
-                    b.HasOne("PuntoVenta.Database.Entidades.User", "Employed")
-                        .WithMany("HistoryCashRegisters")
-                        .HasForeignKey("EmployedId");
-
-                    b.Navigation("Employed");
-                });
-
             modelBuilder.Entity("PuntoVenta.Database.Entidades.Product", b =>
                 {
                     b.HasOne("PuntoVenta.Database.Entidades.Category", "Category")
@@ -637,36 +486,6 @@ namespace PuntoVenta.Migrations
                     b.Navigation("Category");
 
                     b.Navigation("UnitMeasurement");
-                });
-
-            modelBuilder.Entity("PuntoVenta.Database.Entidades.Purchase", b =>
-                {
-                    b.HasOne("PuntoVenta.Database.Entidades.Supplier", "Supplier")
-                        .WithMany("Purchases")
-                        .HasForeignKey("SupplierId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Supplier");
-                });
-
-            modelBuilder.Entity("PuntoVenta.Database.Entidades.PurchaseDetail", b =>
-                {
-                    b.HasOne("PuntoVenta.Database.Entidades.Product", "Product")
-                        .WithMany("PurchaseDetails")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PuntoVenta.Database.Entidades.Purchase", "Purchase")
-                        .WithMany("PurchaseDetails")
-                        .HasForeignKey("PurchaseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
-
-                    b.Navigation("Purchase");
                 });
 
             modelBuilder.Entity("PuntoVenta.Database.Entidades.Sale", b =>
@@ -710,24 +529,12 @@ namespace PuntoVenta.Migrations
 
             modelBuilder.Entity("PuntoVenta.Database.Entidades.Product", b =>
                 {
-                    b.Navigation("PurchaseDetails");
-
                     b.Navigation("SaleDetails");
-                });
-
-            modelBuilder.Entity("PuntoVenta.Database.Entidades.Purchase", b =>
-                {
-                    b.Navigation("PurchaseDetails");
                 });
 
             modelBuilder.Entity("PuntoVenta.Database.Entidades.Sale", b =>
                 {
                     b.Navigation("SaleDetails");
-                });
-
-            modelBuilder.Entity("PuntoVenta.Database.Entidades.Supplier", b =>
-                {
-                    b.Navigation("Purchases");
                 });
 
             modelBuilder.Entity("PuntoVenta.Database.Entidades.UnitMeasurement", b =>
@@ -737,8 +544,6 @@ namespace PuntoVenta.Migrations
 
             modelBuilder.Entity("PuntoVenta.Database.Entidades.User", b =>
                 {
-                    b.Navigation("HistoryCashRegisters");
-
                     b.Navigation("SaleCustomer");
 
                     b.Navigation("SaleEmployed");

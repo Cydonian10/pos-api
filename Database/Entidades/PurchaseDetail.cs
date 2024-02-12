@@ -2,7 +2,7 @@
 
 namespace PuntoVenta.Database.Entidades
 {
-    public class SaleDetail
+    public class PurchaseDetail
     {
         public int Id { get; set; }
 
@@ -12,16 +12,8 @@ namespace PuntoVenta.Database.Entidades
         [Column(TypeName = "decimal(18,2)")]
         public decimal SubTotal { get; set; }
         public int ProductId { get; set; }
-        public int SaleId { get; set; }
-
-        [Column(TypeName = "decimal(18,2)")]
-        public decimal? Descuento { get; set; }
-
-        [Column(TypeName = "decimal(18,2)")]
-        public decimal? UnitPrice { get; set; }
+        public int PurchaseId { get; set; }
         public virtual Product? Product { get; set; }
-        public virtual Sale? Sale { get; set; }
-
+        public virtual Purchase? Purchase { get; set; }
     }
 }
-

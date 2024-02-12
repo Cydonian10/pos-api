@@ -17,6 +17,9 @@ namespace PuntoVenta.Dtos
         public string? Type { get; set; }
         public string? Description { get; set; }
         public string? Size { get; set; }
-        public ProductNameDto? Detalle { get; set; }
+        public string? CondicionDiscount { get; set; }
+        public string? Name { get; set; }
+        public CategoryDto? Category { get; set; }
+        public UnitMeasurementDto? UnitMeasurement { get; set; }
     }
 }

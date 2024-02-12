@@ -21,7 +21,13 @@ namespace PuntoVenta.Database.Entidades
         public string? Type { get; set;}
         public string? Description { get; set; }
         public string? Size { get; set;}
-        public int? ProductNameId { get; set; }
-        public virtual ProductName? ProductName { get; set;}
+        public int UnitMeasurementId { get; set; }
+        public string? CondicionDiscount { get; set; }
+        public string? Name { get; set; }
+        public int CategoryId { get; set; }
+        public virtual Category? Category { get; set; }
+        public virtual UnitMeasurement? UnitMeasurement { get; set; }
+        public virtual List<SaleDetail>? SaleDetails { get; set; }
+        public virtual List<PurchaseDetail>? PurchaseDetails { get; set; }
     }
 }

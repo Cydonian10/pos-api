@@ -193,7 +193,7 @@ namespace PuntoVenta.Controllers
 
             if (usuarioId == null) { NotFound(); }
             
-            var usuarioDb = await context.Users.FirstOrDefaultAsync();
+            var usuarioDb = await context.Users.FirstOrDefaultAsync(x => x.Id == usuarioId);
 
             var userDto = mapper.Map<UserDto>(usuarioDb);
 

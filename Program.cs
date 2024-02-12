@@ -8,12 +8,14 @@ using PuntoVenta.Database;
 using PuntoVenta.Database.Entidades;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -66,6 +68,13 @@ builder.Services.AddAuthorization(options =>
             policy
             .RequireClaim(ClaimTypes.Role, ["Admin","Empleado"])
         );
+
+    options.AddPolicy(
+      "ManejadorVentas",
+      policy =>
+          policy
+          .RequireClaim(ClaimTypes.Role, ["Admin", "Empleado"])
+      );
 
     options.AddPolicy(
         "NivelAccesoTotal",

@@ -10,8 +10,10 @@
         public string? Type { get; set; }
         public string? Description { get; set; }
         public string? Size { get; set; }
-        public int ProductNameId { get; set; }
         public int CategoryId { get; set; }
+        public int UnitMeasurementId { get; set; }
+        public string? CondicionDiscount { get; set; }
         public string? Name { get; set; }
+
     }
-}
+}   

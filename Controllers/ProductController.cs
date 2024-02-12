@@ -13,7 +13,7 @@ namespace PuntoVenta.Controllers
 {
     [Route("api/products")]
     [ApiController]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ProductController : CustomBaseController
     {
         private readonly DataContext context;
@@ -26,13 +26,17 @@ namespace PuntoVenta.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ProductDto>> Create([FromBody] ProductoCrearDto productoCrearDto)
+        public async Task<ActionResult> Create([FromBody] ProductoCrearDto productoCrearDto)
         {
             var productEntity = mapper.Map<Product>(productoCrearDto);
+
             await context.Products.AddAsync(productEntity!);
             await context.SaveChangesAsync();
-            var productoDto = mapper.Map<ProductDto>(productEntity);
-            return productoDto!;
+
+            var productDto = mapper.Map<ProductDto>(productEntity);
+
+            return Ok(productDto);
+
         }
 
         //[Authorize(Policy = "ManejadorProductos")]
@@ -40,24 +44,43 @@ namespace PuntoVenta.Controllers
         [HttpGet()]
         public async Task<ActionResult<List<ProductDto>>> ListPaginada([FromQuery] PageDto pageDto)
         {
-            var queryble = context.Products.Include(e => e.ProductName).ThenInclude(e => e!.Category).AsQueryable();
+            var queryble = context.Products
+                            .Include(e => e.Category)
+                            .Include(e => e!.UnitMeasurement)
+                            .AsQueryable();
+
             await HttpContext.InsertarParametrosPaginar(queryble, pageDto.quantityRecordsPerPage);
             var productsDb = await queryble.Paginar(pageDto).ToListAsync();
-            var productDto = mapper.Map<List<ProductDto>>(productsDb);
-            return productDto!;
+            List<ProductDto> productDtos = mapper.Map<List<ProductDto>>(productsDb)!;
+            return productDtos!;
         }
 
 
-        // Warn arreglar Dto para actulizar producto
+        //Warn arreglar Dto para actulizar producto
         [HttpPut("{id:int}")]
-        public async Task<ActionResult> Update([FromRoute]int id, [FromBody] ProductoCrearDto productoCrearDto)
+        public async Task<ActionResult> update([FromRoute] int id, [FromBody] ProductoCrearDto productocreardto)
         {
-            var productuDb = await context.Products.Include(e => e.ProductName).FirstOrDefaultAsync(e => e.Id == id);
-            if(productuDb == null) { return NotFound(); }
-            productuDb = mapper.Map(productoCrearDto, productuDb);
-            productuDb!.ProductName!.Id = productoCrearDto.ProductNameId;
+            var productuDB = await context.Products.FirstOrDefaultAsync(e => e.Id == id);
+
+            if (productuDB == null) { return NotFound(); }
+
+            if (productuDB!.SalePrice != productocreardto.SalePrice)
+            {
+                var historyPriceDb = new HistoryPriceProduct
+                {
+                    OldPrice = productuDB!.SalePrice,
+                    ProductId = productuDB.Id,
+                    Date = DateTime.UtcNow
+                };
+                await context.HistoryPriceProducts.AddAsync(historyPriceDb);
+                await context.SaveChangesAsync();
+            }
+
+            mapper.Map(productocreardto, productuDB);
+
+
             await context.SaveChangesAsync();
-            return NoContent();
+            return Ok();
         }
 
         [HttpGet("filtro")]
@@ -65,12 +88,12 @@ namespace PuntoVenta.Controllers
         {
             var productQueryble = context.Products.AsQueryable();
 
-            if(!string.IsNullOrEmpty(filtroDto.Name))
+            if (!string.IsNullOrEmpty(filtroDto.Name))
             {
-                productQueryble = productQueryble.Include(x => x.ProductName).Where(x => x.ProductName!.Name!.Contains(filtroDto.Name));
+                productQueryble = productQueryble.Where(x => x.Name!.Contains(filtroDto.Name));
             }
 
-            if(filtroDto.Stock != null)
+            if (filtroDto.Stock != null)
             {
                 productQueryble = productQueryble.Where(x => x.Stock == filtroDto.Stock);
             }
@@ -80,8 +103,14 @@ namespace PuntoVenta.Controllers
                 productQueryble = productQueryble.Where(x => x.SalePrice >= filtroDto.Price);
             }
 
-            var productsDb = await productQueryble.Include(x => x.ProductName).ToListAsync();
-            return mapper.Map<List<ProductDto>>(productsDb)!;
+            var productsDb = await productQueryble
+                                .Include(x => x.Category)
+                                .Include(x => x.UnitMeasurement)
+                                .ToListAsync();
+
+            List<ProductDto> productDtos = mapper.Map<List<ProductDto>>(productsDb)!;
+
+            return productDtos;
         }
 
 

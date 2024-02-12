@@ -9,5 +9,8 @@ namespace PuntoVenta.Database.Entidades
         public decimal Salary { get; set; }
         public DateTime Birthday { get; set; }
         // public string Avatar { get; set; }
+        public virtual List<Sale>? SaleCustomer { get; set; }
+        public virtual List<Sale>? SaleEmployed { get; set; }
+        public virtual List<HistoryCashRegister>? HistoryCashRegisters { get; set; }
     }
 }

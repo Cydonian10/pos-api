@@ -12,8 +12,8 @@ using PuntoVenta.Database;
 namespace PuntoVenta.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240208154306_Init")]
-    partial class Init
+    [Migration("20240211201311_HistoryProductDate")]
+    partial class HistoryProductDate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,9 @@ namespace PuntoVenta.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.HasSequence<int>("MiEntidad_Id_seq", "dbo")
+                .StartsAt(100L);
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -177,6 +180,28 @@ namespace PuntoVenta.Migrations
                     b.ToTable("Categories", (string)null);
                 });
 
+            modelBuilder.Entity("PuntoVenta.Database.Entidades.HistoryPriceProduct", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("OldPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HistoryPriceProduct", (string)null);
+                });
+
             modelBuilder.Entity("PuntoVenta.Database.Entidades.Product", b =>
                 {
                     b.Property<int>("Id")
@@ -185,14 +210,20 @@ namespace PuntoVenta.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CondicionDiscount")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Image")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ProductNameId")
-                        .HasColumnType("int");
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("PurchaseDesc")
                         .HasColumnType("decimal(18,2)");
@@ -212,14 +243,19 @@ namespace PuntoVenta.Migrations
                     b.Property<string>("Type")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("UnitMeasurementId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductNameId");
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("UnitMeasurementId");
 
                     b.ToTable("Products", (string)null);
                 });
 
-            modelBuilder.Entity("PuntoVenta.Database.Entidades.ProductName", b =>
+            modelBuilder.Entity("PuntoVenta.Database.Entidades.Sale", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -227,17 +263,87 @@ namespace PuntoVenta.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CategoryId")
+                    b.Property<string>("CustomerId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("EmployedId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<decimal>("Taxes")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("VaucherNumber")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValueSql("next value for dbo.MiEntidad_Id_seq");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("EmployedId");
+
+                    b.ToTable("Sales", (string)null);
+                });
+
+            modelBuilder.Entity("PuntoVenta.Database.Entidades.SaleDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal?>("Descuento")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("SaleId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("SubTotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("SaleId");
+
+                    b.ToTable("SaleDetails", (string)null);
+                });
+
+            modelBuilder.Entity("PuntoVenta.Database.Entidades.UnitMeasurement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Symbol")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
-
-                    b.ToTable("ProductNames", (string)null);
+                    b.ToTable("UnitMeasurements");
                 });
 
             modelBuilder.Entity("PuntoVenta.Database.Entidades.User", b =>
@@ -364,32 +470,82 @@ namespace PuntoVenta.Migrations
 
             modelBuilder.Entity("PuntoVenta.Database.Entidades.Product", b =>
                 {
-                    b.HasOne("PuntoVenta.Database.Entidades.ProductName", "ProductName")
-                        .WithMany("Products")
-                        .HasForeignKey("ProductNameId");
-
-                    b.Navigation("ProductName");
-                });
-
-            modelBuilder.Entity("PuntoVenta.Database.Entidades.ProductName", b =>
-                {
                     b.HasOne("PuntoVenta.Database.Entidades.Category", "Category")
-                        .WithMany("ProductNames")
+                        .WithMany("Products")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("PuntoVenta.Database.Entidades.UnitMeasurement", "UnitMeasurement")
+                        .WithMany("Products")
+                        .HasForeignKey("UnitMeasurementId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Category");
+
+                    b.Navigation("UnitMeasurement");
+                });
+
+            modelBuilder.Entity("PuntoVenta.Database.Entidades.Sale", b =>
+                {
+                    b.HasOne("PuntoVenta.Database.Entidades.User", "Customer")
+                        .WithMany("SaleCustomer")
+                        .HasForeignKey("CustomerId");
+
+                    b.HasOne("PuntoVenta.Database.Entidades.User", "Employed")
+                        .WithMany("SaleEmployed")
+                        .HasForeignKey("EmployedId");
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Employed");
+                });
+
+            modelBuilder.Entity("PuntoVenta.Database.Entidades.SaleDetail", b =>
+                {
+                    b.HasOne("PuntoVenta.Database.Entidades.Product", "Product")
+                        .WithMany("SaleDetails")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PuntoVenta.Database.Entidades.Sale", "Sale")
+                        .WithMany("SaleDetails")
+                        .HasForeignKey("SaleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Sale");
                 });
 
             modelBuilder.Entity("PuntoVenta.Database.Entidades.Category", b =>
                 {
-                    b.Navigation("ProductNames");
+                    b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("PuntoVenta.Database.Entidades.ProductName", b =>
+            modelBuilder.Entity("PuntoVenta.Database.Entidades.Product", b =>
+                {
+                    b.Navigation("SaleDetails");
+                });
+
+            modelBuilder.Entity("PuntoVenta.Database.Entidades.Sale", b =>
+                {
+                    b.Navigation("SaleDetails");
+                });
+
+            modelBuilder.Entity("PuntoVenta.Database.Entidades.UnitMeasurement", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("PuntoVenta.Database.Entidades.User", b =>
+                {
+                    b.Navigation("SaleCustomer");
+
+                    b.Navigation("SaleEmployed");
                 });
 #pragma warning restore 612, 618
         }

@@ -38,5 +38,19 @@ namespace PuntoVenta.Controllers
         {
             return await Create<Category, CategoryCrearDto,CategoryDto>(categoryCrearDto, "ObtenerCategory");
         }
+
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult> Update([FromRoute] int id, [FromBody] CategoryCrearDto dto)
+        {
+            return await Update<Category, CategoryCrearDto>(id, dto);
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult> Delete([FromRoute] int id)
+        {
+            return await Delete<Category>(id);
+        }
+
+
     }
 }

@@ -1,8 +1,8 @@
 ﻿namespace PuntoVenta.Dtos
 {
-    public class ProductNameDto
+    public class UnitMeasurementDto
     {
         public string? Name { get; set; }
-        public string? Category { get; set; }
+        public string? Symbol { get; set; }
     }
 }

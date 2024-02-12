@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PuntoVenta.Database;
 
@@ -11,9 +12,11 @@ using PuntoVenta.Database;
 namespace PuntoVenta.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240212024317_Supplier y Purchase")]
+    partial class SupplieryPurchase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -160,34 +163,6 @@ namespace PuntoVenta.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("PuntoVenta.Database.Entidades.CashRegister", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal?>("InitialCash")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("Open")
-                        .HasColumnType("bit");
-
-                    b.Property<decimal?>("TotalCash")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("CashRegisters", (string)null);
-                });
-
             modelBuilder.Entity("PuntoVenta.Database.Entidades.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -205,36 +180,6 @@ namespace PuntoVenta.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories", (string)null);
-                });
-
-            modelBuilder.Entity("PuntoVenta.Database.Entidades.HistoryCashRegister", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CashRegisterId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("EmployedId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("TotalCash")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmployedId");
-
-                    b.ToTable("HistoryCashRegisters", (string)null);
                 });
 
             modelBuilder.Entity("PuntoVenta.Database.Entidades.HistoryPriceProduct", b =>
@@ -611,15 +556,6 @@ namespace PuntoVenta.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PuntoVenta.Database.Entidades.HistoryCashRegister", b =>
-                {
-                    b.HasOne("PuntoVenta.Database.Entidades.User", "Employed")
-                        .WithMany("HistoryCashRegisters")
-                        .HasForeignKey("EmployedId");
-
-                    b.Navigation("Employed");
-                });
-
             modelBuilder.Entity("PuntoVenta.Database.Entidades.Product", b =>
                 {
                     b.HasOne("PuntoVenta.Database.Entidades.Category", "Category")
@@ -737,8 +673,6 @@ namespace PuntoVenta.Migrations
 
             modelBuilder.Entity("PuntoVenta.Database.Entidades.User", b =>
                 {
-                    b.Navigation("HistoryCashRegisters");
-
                     b.Navigation("SaleCustomer");
 
                     b.Navigation("SaleEmployed");
