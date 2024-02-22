@@ -1,33 +1,40 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace PuntoVenta.Database.Entidades
+namespace PuntoVenta.Modules.Products.Dtos
 {
-    public class Product : IId
+    public class CreateProductDto
     {
-        public int Id { get; set; }
-
+        [Required]
         [Column(TypeName = "decimal(18,2)")]
         public decimal Stock { get; set; }
 
+        [Required]
         [Column(TypeName = "decimal(18,2)")]
         public decimal SalePrice { get; set; }
 
+        [Required]
         [Column(TypeName = "decimal(18,2)")]
-        public decimal PurchasePrice { get; set;}
+        public decimal PurchasePrice { get; set; }
 
+        [Required]
         [Column(TypeName = "decimal(18,2)")]
         public decimal PurchaseDesc { get; set; }
         public string? Image { get; set; }
-        public string? Type { get; set;}
+        public string? Type { get; set; }
         public string? Description { get; set; }
-        public string? Size { get; set;}
+
+        [Required]
+        public string? Size { get; set; }
         public string? CondicionDiscount { get; set; }
+
+        [Required]
         public string? Name { get; set; }
+
+        [Required]
         public int CategoryId { get; set; }
+
+        [Required]
         public int UnitMeasurementId { get; set; }
-        public virtual Category? Category { get; set; }
-        public virtual UnitMeasurement? UnitMeasurement { get; set; }
-        public virtual List<SaleDetail>? SaleDetails { get; set; }
-        public virtual List<PurchaseDetail>? PurchaseDetails { get; set; }
     }
 }

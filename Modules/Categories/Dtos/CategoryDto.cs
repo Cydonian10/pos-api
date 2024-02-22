@@ -1,0 +1,11 @@
+﻿using PuntoVenta.Database.Entidades;
+
+namespace PuntoVenta.Modules.Categories.Dtos
+{
+    public class CategoryDto
+    {
+        public int Id { get; set; }
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+    }
+}

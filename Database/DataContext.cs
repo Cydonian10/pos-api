@@ -52,6 +52,7 @@ namespace PuntoVenta.Database
                 e.Property(e => e.VaucherNumber).HasDefaultValueSql("next value for dbo.MiEntidad_Id_seq"); ;
                 e.HasOne(e => e.Customer).WithMany(e => e.SaleCustomer).HasForeignKey(e => e.CustomerId);
                 e.HasOne(e => e.Employed).WithMany(e => e.SaleEmployed).HasForeignKey(e => e.EmployedId);
+                e.HasOne(e => e.CashRegister).WithMany(e => e.Sales).HasForeignKey(e => e.CashRegisterId);
             });
 
             modelBuilder.Entity<SaleDetail>(e =>
