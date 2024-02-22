@@ -8,10 +8,10 @@ namespace PuntoVenta.Database.Entidades
         public string? Name { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
-        public decimal? TotalCash { get; set; }
+        public decimal TotalCash { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
-        public decimal? InitialCash { get; set; }
+        public decimal InitialCash { get; set; }
         public DateTime Date { get; set; }
         public bool Open { get; set; }
         public virtual List<Sale>? Sales { get; set; }

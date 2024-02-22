@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PuntoVenta.Database;
@@ -9,6 +11,8 @@ using System.Security.Claims;
 
 namespace PuntoVenta.Modules.CashRegister
 {
+
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/cash-registers")]
     [ApiController]
     public class CashRegistersController : ControllerBase
@@ -32,15 +36,16 @@ namespace PuntoVenta.Modules.CashRegister
         {
             var cashRegister = await context.CashRegisters.FirstOrDefaultAsync(x => x.Id == id);
 
-            if(cashRegister == null) { return NotFound($"No se encontro caja registradora con id {id}"); }
-            
+            if (cashRegister == null) { return NotFound($"No se encontro caja registradora con id {id}"); }
+
             return cashRegister.ToDto();
         }
 
-        [HttpPost]  
+        [HttpPost]
         public async Task<ActionResult> Create([FromBody] CashRegisterCrearDto dto)
         {
             var cashRegister = dto.ToEntity();
+            cashRegister.TotalCash = cashRegister.InitialCash;
             await context.CashRegisters.AddAsync(cashRegister);
             await context.SaveChangesAsync();
 
@@ -54,8 +59,7 @@ namespace PuntoVenta.Modules.CashRegister
             var employedId = HttpContext.User.Claims.Where(claim => claim.Type == ClaimTypes.NameIdentifier).FirstOrDefault()!.Value;
 
             if (cashRegisterDB == null) { return NotFound(); }
-
-            cashRegisterDB.Open = false;
+            if (cashRegisterDB.Open == false) { return Conflict("La caja registradora ya esta cerrada"); }
 
             var historyCashRegister = new HistoryCashRegister
             {
@@ -66,10 +70,32 @@ namespace PuntoVenta.Modules.CashRegister
                 Name = cashRegisterDB.Name
             };
 
+            cashRegisterDB.Open = false;
+
             await context.HistoryCashRegisters.AddAsync(historyCashRegister);
             await context.SaveChangesAsync();
             return NoContent();
         }
+
+        [HttpPut("open/{id:int}")]
+        public async Task<ActionResult<CashRegisterDto>> Open([FromRoute] int id, [FromBody] OpenCashRegisterDto dto)
+        {
+            var cashRegisterDB = await context.CashRegisters.FirstOrDefaultAsync(x => x.Id == id);
+
+            if (cashRegisterDB == null) { return NotFound(); };
+            if(cashRegisterDB.Open == true ) { return Conflict("La caja registradora ya esta abierto primero cierrela"); }
+
+            cashRegisterDB.InitialCash = dto.InitialCash;
+            cashRegisterDB.TotalCash = dto.InitialCash;
+            cashRegisterDB.Open = true;
+
+            await context.SaveChangesAsync();
+
+            return cashRegisterDB.ToDto();  
+        }
+
+        
+
 
     }
 }

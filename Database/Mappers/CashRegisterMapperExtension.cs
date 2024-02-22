@@ -13,7 +13,8 @@ namespace PuntoVenta.Database.Mappers
                 Date = cashRegister.Date,
                 InitialCash = (decimal)cashRegister.InitialCash!,
                 Name = cashRegister.Name,
-                Open = cashRegister.Open
+                Open = cashRegister.Open,
+                TotalCash = (decimal)cashRegister.TotalCash!
             };
         }
 
@@ -24,7 +25,6 @@ namespace PuntoVenta.Database.Mappers
                 InitialCash = dto.InitialCash,
                 Name = dto.Name,
                 Date = dto.Date,
-                TotalCash = dto.TotalCash
             };
         }
     }

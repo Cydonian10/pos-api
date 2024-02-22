@@ -22,6 +22,7 @@ namespace PuntoVenta.Database.Mappers
                 Name = dto.Name,
                 CategoryId = dto.CategoryId,
                 UnitMeasurementId = dto.UnitMeasurementId,
+                
             };
         }
 

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PuntoVenta.Database;
+using PuntoVenta.Database.Entidades;
 using PuntoVenta.Database.Mappers;
 using PuntoVenta.Modules.Sales.Dtos;
 using System.Security.Claims;
@@ -30,6 +31,11 @@ namespace PuntoVenta.Modules.Sales
             {
                 try
                 {
+                    if(crearDto.statusCompra == EStatusCompra.Cotizacion)
+                    {
+                        return NoContent();
+                    }
+
                     var sale = crearDto.ToEntity();
                     var employedId = HttpContext.User.Claims.Where(claim => claim.Type == ClaimTypes.NameIdentifier).FirstOrDefault()!.Value;
 
@@ -69,10 +75,18 @@ namespace PuntoVenta.Modules.Sales
 
                     var cashRegisterDb = await context.CashRegisters.FirstOrDefaultAsync(x => x.Id == crearDto.CashRegisterId);
 
-                    if (cashRegisterDb != null)
+                    if(cashRegisterDb!.Open == false)
+                    {
+                        throw new InvalidOperationException($"La caja esta cerrada");
+                    }
+
+                    if (cashRegisterDb != null  )
                     {
                         cashRegisterDb!.TotalCash += sale.TotalPrice;
                     }
+
+
+                    
 
                     await context.SaveChangesAsync();
                     await transaction.CommitAsync();

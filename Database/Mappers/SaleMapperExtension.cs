@@ -13,6 +13,7 @@ namespace PuntoVenta.Database.Mappers
                 Date = dto.Date,
                 CustomerId = dto.CustomerId,
                 CashRegisterId = dto.CashRegisterId,
+                EStatusCompra = dto.statusCompra,
                 SaleDetails = dto.SaleDetails!.Select(
                     x => new SaleDetail
                             {
