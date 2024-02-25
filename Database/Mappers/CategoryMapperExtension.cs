@@ -51,5 +51,7 @@ namespace PuntoVenta.Database.Mappers
             category.Description = dto.Description;
             return category;
         }
+
+
     }
 }

@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PuntoVenta.Database;
+using PuntoVenta.Database.Entidades;
 using PuntoVenta.Database.Mappers;
 using PuntoVenta.Helpers.Dtos;
 using PuntoVenta.Helpers.Extensions;
@@ -94,6 +96,43 @@ namespace PuntoVenta.Modules.Products
             return NoContent();
         }
 
+        [HttpPatch("{id:int}")]
+        public async Task<ActionResult> Path([FromRoute] int id, JsonPatchDocument<PatchProductDto> jsonPatchDto)
+        {
+            if(jsonPatchDto == null) { return BadRequest(); }
+            var productDB = await context.Products.FirstOrDefaultAsync(x => x.Id == id);
+
+            if (productDB == null) { return NotFound(); }
+
+            var historyProduct = new HistoryPriceProduct
+            {
+                ProductId = id,
+                Date = DateTime.Now,
+                OldPrice = productDB.SalePrice,
+                Name = productDB.Name
+            };
+
+            await context.HistoryPriceProducts.AddAsync(historyProduct);
+
+            await context.SaveChangesAsync();
+
+            var productDTO = productDB.ToPachEntity();
+
+            jsonPatchDto.ApplyTo(productDTO, ModelState);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            productDB.SalePrice = productDTO.SalePrice;
+
+            await context.SaveChangesAsync();
+
+            return NoContent();
+
+        }
+
+
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> Delete([FromRoute] int id)
         {
@@ -104,6 +143,18 @@ namespace PuntoVenta.Modules.Products
             await context.SaveChangesAsync();
 
             return Ok(new { id });
+        }
+
+
+        [HttpGet("history/{id:int}")]
+        public async Task<ActionResult> GetHistoryProducts([FromRoute] int id)
+        {
+            var historyProductsDB = await context.HistoryPriceProducts
+                .Where(p => p.ProductId == id)
+                .OrderByDescending(x => x.Date)
+                .ToListAsync();
+
+            return Ok(historyProductsDB);
         }
 
     }

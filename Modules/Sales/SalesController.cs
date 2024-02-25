@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Drawing.Diagrams;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,6 +9,7 @@ using PuntoVenta.Database;
 using PuntoVenta.Database.Entidades;
 using PuntoVenta.Database.Mappers;
 using PuntoVenta.Modules.Sales.Dtos;
+using System.Data;
 using System.Security.Claims;
 
 namespace PuntoVenta.Modules.Sales
@@ -25,16 +28,13 @@ namespace PuntoVenta.Modules.Sales
 
         [Authorize(Policy = "ManejadorVentas")]
         [HttpPost]
-        public async Task<IActionResult> GenerateSale([FromBody] SaleCrearDto crearDto)
+        public async Task<ActionResult> GenerateSale([FromBody] SaleCrearDto crearDto)
         {
             using (var transaction = await context.Database.BeginTransactionAsync())
             {
                 try
                 {
-                    if(crearDto.statusCompra == EStatusCompra.Cotizacion)
-                    {
-                        return NoContent();
-                    }
+                   
 
                     var sale = crearDto.ToEntity();
                     var employedId = HttpContext.User.Claims.Where(claim => claim.Type == ClaimTypes.NameIdentifier).FirstOrDefault()!.Value;
@@ -51,6 +51,12 @@ namespace PuntoVenta.Modules.Sales
                         }
                     });
                     sale.TotalPrice = sale.SaleDetails.Sum(x => x.SubTotal);
+
+                    if (crearDto.statusCompra == EStatusCompra.Cotizacion)
+                    {
+
+                        return GenerarExel(sale, crearDto.SaleDetails!);
+                    }
 
                     await context.Sales.AddAsync(sale);
                     await context.SaveChangesAsync();
@@ -120,6 +126,34 @@ namespace PuntoVenta.Modules.Sales
             return Ok(saleDTO);
         }
 
+        private FileResult GenerarExel(Sale sale, List<SaleDetailCrearDto> dto)
+        {
+            DataTable dataTable = new DataTable("Cotizacion");
+            dataTable.Columns.AddRange(
+            [
+                new DataColumn("Nombre"),
+                new DataColumn("Quantity"),
+                new DataColumn("Unit Price"),
+                new DataColumn("Sub Total"),
+            ]);
 
+            for (int i = 0; i < sale.SaleDetails!.Count(); i++)
+            {
+                dataTable.Rows.Add(dto[i].Name, dto[i].Quantity, dto[i].UnitPrice, sale.SaleDetails![i].SubTotal);
+            }
+            using (var memoryStream = new MemoryStream())
+            {
+                using (var workbook = new XLWorkbook())
+                {
+                    var worksheet = workbook.Worksheets.Add(dataTable, "Cotizacion");
+
+                    worksheet.Cell(dataTable.Rows.Count + dto.Count + 1, 3).Value = "Total";
+                    worksheet.Cell(dataTable.Rows.Count + dto.Count + 1, 4).Value = sale.TotalPrice;
+                    workbook.SaveAs(memoryStream);
+
+                    return File(memoryStream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",$"Cotizacion{Guid.NewGuid()}");
+                }
+            }
+        }
     }
 }

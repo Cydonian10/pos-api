@@ -71,5 +71,13 @@ namespace PuntoVenta.Database.Mappers
 
             return product;
         }
+
+        public static PatchProductDto ToPachEntity(this Product product)
+        {
+            return new PatchProductDto
+            {
+                SalePrice = product.SalePrice,
+            };
+        }
     }
 }

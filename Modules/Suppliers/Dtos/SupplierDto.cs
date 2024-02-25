@@ -1,9 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace PuntoVenta.Dtos
+namespace PuntoVenta.Modules.Suppliers.Dtos
 {
     public class SupplierDto
     {
+        public int Id { get; set; }
+
         [MaxLength(150)]
         public string? Name { get; set; }
 
@@ -11,7 +13,6 @@ namespace PuntoVenta.Dtos
         public string? Adress { get; set; }
 
         [MaxLength(9)]
-        [RegularExpression("^[0-9]*$", ErrorMessage = "El campo debe contener solo números.")]
         public string? Phone { get; set; }
     }
 }
