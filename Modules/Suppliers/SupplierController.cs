@@ -34,7 +34,7 @@ namespace PuntoVenta.Modules.Suppliers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Create([FromBody] SuplierCreateDto dto)
+        public async Task<ActionResult> Create([FromBody] CreateSuplierDto dto)
         {
             var supplier = dto.ToEntity();
             await context.Suppliers.AddAsync(supplier);
@@ -43,7 +43,7 @@ namespace PuntoVenta.Modules.Suppliers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<ActionResult<SupplierDto>> Update([FromRoute] int id, [FromBody] SuplierCreateDto dto)
+        public async Task<ActionResult<SupplierDto>> Update([FromRoute] int id, [FromBody] CreateSuplierDto dto)
         {
             var supplier = await context.Suppliers.FirstOrDefaultAsync(x => x.Id == id);
             if (supplier == null) { return NotFound(); }

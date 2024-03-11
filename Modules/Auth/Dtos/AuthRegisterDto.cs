@@ -1,6 +1,4 @@
-﻿using PuntoVenta.Dtos;
-
-namespace PuntoVenta.Modules.Auth.Dtos
+﻿namespace PuntoVenta.Modules.Auth.Dtos
 {
     public class AuthRegisterDto : IAuthCredencial
     {

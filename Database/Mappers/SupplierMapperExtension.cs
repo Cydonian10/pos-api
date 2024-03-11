@@ -1,5 +1,4 @@
 ﻿using PuntoVenta.Database.Entidades;
-using PuntoVenta.Dtos;
 using PuntoVenta.Modules.Purchases.Dtos;
 using PuntoVenta.Modules.Suppliers.Dtos;
 
@@ -7,7 +6,7 @@ namespace PuntoVenta.Database.Mappers
 {
     public static class SupplierMapperExtension
     {
-        public static Supplier ToEntity(this SuplierCreateDto dto)
+        public static Supplier ToEntity(this CreateSuplierDto dto)
         {
             return new Supplier
             {
@@ -47,7 +46,7 @@ namespace PuntoVenta.Database.Mappers
             };
         }
 
-        public static Supplier ToEntityUpdate(this Supplier entity, SuplierCreateDto dto)
+        public static Supplier ToEntityUpdate(this Supplier entity, CreateSuplierDto dto)
         {
             entity.Adress = dto.Adress;
             entity.Name = dto.Name;

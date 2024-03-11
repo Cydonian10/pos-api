@@ -2,7 +2,7 @@
 
 namespace PuntoVenta.Modules.Suppliers.Dtos
 {
-    public class SuplierCreateDto
+    public class CreateSuplierDto
     {
         [MaxLength(150)]
         public string? Name { get; set; }

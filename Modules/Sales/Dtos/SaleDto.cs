@@ -1,5 +1,4 @@
-﻿using PuntoVenta.Dtos;
-using PuntoVenta.Modules.CashRegister.Dtos;
+﻿using PuntoVenta.Modules.CashRegister.Dtos;
 
 namespace PuntoVenta.Modules.Sales.Dtos
 {

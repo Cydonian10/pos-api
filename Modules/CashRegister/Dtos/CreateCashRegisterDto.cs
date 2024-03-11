@@ -2,7 +2,7 @@
 
 namespace PuntoVenta.Modules.CashRegister.Dtos
 {
-    public class CashRegisterCrearDto
+    public class CreateCashRegisterDto
     {
 
         [Required]

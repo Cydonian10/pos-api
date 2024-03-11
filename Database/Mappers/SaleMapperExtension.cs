@@ -5,7 +5,7 @@ namespace PuntoVenta.Database.Mappers
 {
     public static class SaleMapperExtension
     {
-        public static Sale ToEntity(this SaleCrearDto dto)
+        public static Sale ToEntity(this CreateSaleDto dto)
         {
             return new Sale
             {

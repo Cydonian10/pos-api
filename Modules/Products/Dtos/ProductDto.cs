@@ -26,6 +26,10 @@ namespace PuntoVenta.Modules.Products.Dtos
         public string? Size { get; set; }
         public string? CondicionDiscount { get; set; }
         public string? Name { get; set; }
+        public int BarCode { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal TotalSales { get; set; }
         public virtual CategoryDto? Category { get; set; }
         public virtual UnitDto? UnitMeasurement { get; set; }
    

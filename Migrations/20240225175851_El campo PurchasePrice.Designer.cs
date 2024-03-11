@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PuntoVenta.Database;
 
@@ -11,9 +12,11 @@ using PuntoVenta.Database;
 namespace PuntoVenta.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240225175851_El campo PurchasePrice")]
+    partial class ElcampoPurchasePrice
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -270,9 +273,6 @@ namespace PuntoVenta.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("BarCode")
-                        .HasColumnType("int");
-
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
@@ -301,9 +301,6 @@ namespace PuntoVenta.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Stock")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("TotalSales")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Type")

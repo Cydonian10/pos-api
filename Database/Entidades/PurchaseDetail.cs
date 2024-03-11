@@ -11,6 +11,9 @@ namespace PuntoVenta.Database.Entidades
 
         [Column(TypeName = "decimal(18,2)")]
         public decimal SubTotal { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal PurchasePrice { get; set; }
         public int ProductId { get; set; }
         public int PurchaseId { get; set; }
         public virtual Product? Product { get; set; }

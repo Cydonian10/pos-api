@@ -7,6 +7,7 @@ using PuntoVenta.Database;
 using PuntoVenta.Database.Entidades;
 using PuntoVenta.Database.Mappers;
 using PuntoVenta.Modules.CashRegister.Dtos;
+using PuntoVenta.Modules.CashRegister.Queries;
 using System.Security.Claims;
 
 namespace PuntoVenta.Modules.CashRegister
@@ -25,6 +26,7 @@ namespace PuntoVenta.Modules.CashRegister
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<List<CashRegisterDto>>> List()
         {
             var cashRegistersDB = await context.CashRegisters.ToListAsync();
@@ -42,7 +44,7 @@ namespace PuntoVenta.Modules.CashRegister
         }
 
         [HttpPost]
-        public async Task<ActionResult> Create([FromBody] CashRegisterCrearDto dto)
+        public async Task<ActionResult> Create([FromBody] CreateCashRegisterDto dto)
         {
             var cashRegister = dto.ToEntity();
             cashRegister.TotalCash = cashRegister.InitialCash;
@@ -94,8 +96,21 @@ namespace PuntoVenta.Modules.CashRegister
             return cashRegisterDB.ToDto();  
         }
 
-        
+        [HttpGet("history/{id:int}")]
+        [AllowAnonymous]
+        public async Task<ActionResult<List<CashRegisterHistoryDto>>> HisotryCashRegister([FromRoute] int id) {
+            var cashRegisterDB = await context.HistoryCashRegisters
+                .Where(x => x.CashRegisterId == id)
+                .Select(h => new CashHistoryWithEmpleado
+                {
+                    HistoryCashRegister = h,
+                    EmployedName = h.Employed!.Name
+                }).ToListAsync();
 
+            return Ok(cashRegisterDB.Select( x => x.ToCashHistoryDto()).ToList());
+        }
 
     }
+
+
 }

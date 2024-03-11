@@ -1,6 +1,6 @@
 ﻿namespace PuntoVenta.Modules.Sales.Dtos
 {
-    public class SaleDetailCrearDto
+    public class CrearteSaleDetailDto
     {
         public decimal Quantity { get; set; }
         public int ProductId { get; set; }

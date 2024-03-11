@@ -6,19 +6,17 @@ namespace PuntoVenta.Modules.Products.Dtos
     public class CreateProductDto
     {
         [Required]
-        [Column(TypeName = "decimal(18,2)")]
         public decimal Stock { get; set; }
 
         [Required]
-        [Column(TypeName = "decimal(18,2)")]
+        [Range(double.Epsilon, double.MaxValue)]
         public decimal SalePrice { get; set; }
 
         [Required]
-        [Column(TypeName = "decimal(18,2)")]
+        [Range(double.Epsilon, double.MaxValue)]
         public decimal PurchasePrice { get; set; }
 
         [Required]
-        [Column(TypeName = "decimal(18,2)")]
         public decimal PurchaseDesc { get; set; }
         public string? Image { get; set; }
         public string? Type { get; set; }
@@ -32,9 +30,17 @@ namespace PuntoVenta.Modules.Products.Dtos
         public string? Name { get; set; }
 
         [Required]
+        [Range(double.Epsilon, double.MaxValue)]
         public int CategoryId { get; set; }
 
         [Required]
+        [Range(double.Epsilon, double.MaxValue)]
         public int UnitMeasurementId { get; set; }
+
+        public int BarCode { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal TotalSales { get; set; }
     }
 }
+

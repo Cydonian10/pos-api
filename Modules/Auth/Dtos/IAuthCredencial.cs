@@ -1,4 +1,4 @@
-﻿namespace PuntoVenta.Dtos
+﻿namespace PuntoVenta.Modules.Auth.Dtos
 {
     public interface IAuthCredencial
     {

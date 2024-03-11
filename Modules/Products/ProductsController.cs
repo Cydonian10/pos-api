@@ -28,8 +28,10 @@ namespace PuntoVenta.Modules.Products
                 .Include(x => x.Category)
                 .Include(x => x.UnitMeasurement).AsQueryable();
             await HttpContext.InsertarParametrosPaginar(queryble,pageDto.quantityRecordsPerPage);
+            var total = await context.Products.CountAsync();
+            var totalPages = Math.Ceiling((decimal)total / pageDto.QuantityRecordsPerPage);
             var productsDB = await queryble.Paginar(pageDto).ToListAsync();
-            return productsDB.Select(x => x.ToDto()).ToList();
+            return Ok( new { totalPages , data = productsDB.Select(x => x.ToDto()).ToList() } );
         }
 
         [HttpGet("{id:int}", Name = "ObtnerProduct")]
@@ -53,7 +55,7 @@ namespace PuntoVenta.Modules.Products
             }
             if (dto.Stock != null)
             {
-                productQueryble = productQueryble.Where(x => x.Stock == dto.Stock);
+                productQueryble = productQueryble.Where(x => x.Stock >= dto.Stock);
             }
 
             if (dto.Price != null)

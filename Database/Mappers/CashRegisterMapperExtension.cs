@@ -1,5 +1,7 @@
 ﻿using PuntoVenta.Database.Entidades;
+using PuntoVenta.Modules.CashRegister;
 using PuntoVenta.Modules.CashRegister.Dtos;
+using PuntoVenta.Modules.CashRegister.Queries;
 
 namespace PuntoVenta.Database.Mappers
 {
@@ -18,13 +20,27 @@ namespace PuntoVenta.Database.Mappers
             };
         }
 
-        public static CashRegister ToEntity(this CashRegisterCrearDto dto)
+        public static CashRegister ToEntity(this CreateCashRegisterDto dto)
         {
             return new CashRegister
             {
                 InitialCash = dto.InitialCash,
                 Name = dto.Name,
                 Date = dto.Date,
+            };
+        }
+
+        public static CashRegisterHistoryDto ToCashHistoryDto(this CashHistoryWithEmpleado entityDB )
+        {
+            return new CashRegisterHistoryDto
+            {
+                Id = entityDB.HistoryCashRegister!.Id,
+                Name = entityDB.HistoryCashRegister.Name,
+                TotalCash = entityDB.HistoryCashRegister.TotalCash,
+                CashRegisterId = entityDB.HistoryCashRegister.CashRegisterId,
+                Date = entityDB.HistoryCashRegister.Date,   
+                EmployedId = entityDB.HistoryCashRegister.EmployedId,
+                NombreEmpleado = entityDB.EmployedName
             };
         }
     }

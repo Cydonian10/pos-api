@@ -90,12 +90,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization(options =>
 {
- 
+
     options.AddPolicy(
         "ManejadorProductos",
-        policy => 
+        policy =>
             policy
-            .RequireClaim(ClaimTypes.Role, ["Admin","Empleado"])
+            .RequireClaim(ClaimTypes.Role, ["Admin", "Empleado"])
         );
 
     options.AddPolicy(
@@ -107,7 +107,7 @@ builder.Services.AddAuthorization(options =>
 
     options.AddPolicy(
         "NivelAccesoTotal",
-        policy => 
+        policy =>
             policy
             .RequireClaim("NiveAcceso", ["100"])
         );
@@ -115,13 +115,11 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", builder =>
+    options.AddDefaultPolicy(builder =>
     {
-        builder
-            .AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader();
+        builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
     });
+
 });
 
 var app = builder.Build();
@@ -135,7 +133,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCors("AllowAll");
+app.UseCors();
 
 app.UseAuthorization();
 

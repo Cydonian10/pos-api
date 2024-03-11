@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using PuntoVenta.Database.Entidades;
 using PuntoVenta.Database;
-using PuntoVenta.Dtos;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -142,7 +141,7 @@ namespace PuntoVenta.Modules.Auth
 
             foreach (var rol in authAddRolDto.Roles!)
             {
-                await userManager.AddClaimAsync(user, new Claim("NiveAcceso", rol));
+                await userManager.RemoveClaimAsync(user, new Claim("NiveAcceso", rol));
             }
 
             return NoContent();

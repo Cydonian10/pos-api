@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Drawing.Diagrams;
+﻿using ClosedXML.Excel;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,18 +26,19 @@ namespace PuntoVenta.Modules.Sales
 
         [Authorize(Policy = "ManejadorVentas")]
         [HttpPost]
-        public async Task<ActionResult> GenerateSale([FromBody] SaleCrearDto crearDto)
+        public async Task<ActionResult> GenerateSale([FromBody] CreateSaleDto crearDto)
         {
             using (var transaction = await context.Database.BeginTransactionAsync())
             {
                 try
                 {
-                   
+
 
                     var sale = crearDto.ToEntity();
                     var employedId = HttpContext.User.Claims.Where(claim => claim.Type == ClaimTypes.NameIdentifier).FirstOrDefault()!.Value;
 
                     sale.EmployedId = employedId;
+                    sale.Date = DateTime.Now;
                     sale.SaleDetails!.ForEach(x =>
                     {
                         x.SubTotal = Math.Round((decimal)(x.Quantity * x.UnitPrice)!, 2);
@@ -70,6 +69,7 @@ namespace PuntoVenta.Modules.Sales
                             if (detail.Quantity <= product.Stock)
                             {
                                 product.Stock -= detail.Quantity;
+                                product.TotalSales += detail.Quantity;
                             }
                             else
                             {
@@ -81,28 +81,29 @@ namespace PuntoVenta.Modules.Sales
 
                     var cashRegisterDb = await context.CashRegisters.FirstOrDefaultAsync(x => x.Id == crearDto.CashRegisterId);
 
-                    if(cashRegisterDb!.Open == false)
+                    if (cashRegisterDb!.Open == false)
                     {
                         throw new InvalidOperationException($"La caja esta cerrada");
                     }
 
-                    if (cashRegisterDb != null  )
+                    if (cashRegisterDb != null)
                     {
                         cashRegisterDb!.TotalCash += sale.TotalPrice;
                     }
 
 
-                    
+
 
                     await context.SaveChangesAsync();
                     await transaction.CommitAsync();
                     return NoContent();
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     await transaction.RollbackAsync();
                     return StatusCode(500, new { Message = "Error al generar la venta", Error = ex.Message });
                 }
-            }   
+            }
         }
 
         [HttpGet]
@@ -126,15 +127,51 @@ namespace PuntoVenta.Modules.Sales
             return Ok(saleDTO);
         }
 
-        private FileResult GenerarExel(Sale sale, List<SaleDetailCrearDto> dto)
+
+        [HttpGet("my-sales")]
+        public async Task<ActionResult> MySales()
+        {
+            var employedId = HttpContext.User.Claims.Where(claim => claim.Type == ClaimTypes.NameIdentifier).FirstOrDefault()!.Value;
+
+            var salesDB = await context.Sales
+                    .Include(x => x.Employed)
+                    .Include(x => x.Customer)
+                    .Include(x => x.CashRegister)
+                    .Include(x => x.SaleDetails!)
+                    .ThenInclude(x => x.Product)
+                    .ThenInclude(x => x!.UnitMeasurement)
+                    .Where(x => x.EmployedId == employedId)
+                    .OrderByDescending(x => x.Date)
+                    .Take(20)
+                    .ToListAsync();
+
+            var saleDTO = salesDB.Select(x => x.ToDto()).ToList();
+
+            return Ok(saleDTO);
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult> Delete([FromRoute] int id)
+        {
+            var saleDb = await context.Sales.FirstOrDefaultAsync(x => x.Id == id);
+
+            if (saleDb == null) { return NotFound(); }
+
+            context.Remove(saleDb);
+            await context.SaveChangesAsync();
+
+            return Ok(new { id });
+        }
+
+        private FileResult GenerarExel(Sale sale, List<CrearteSaleDetailDto> dto)
         {
             DataTable dataTable = new DataTable("Cotizacion");
             dataTable.Columns.AddRange(
             [
                 new DataColumn("Nombre"),
-                new DataColumn("Quantity"),
-                new DataColumn("Unit Price"),
-                new DataColumn("Sub Total"),
+                new DataColumn("Quantity",typeof(decimal)),
+                new DataColumn("Unit Price",typeof(decimal)),
+                new DataColumn("Sub Total",typeof(decimal)),
             ]);
 
             for (int i = 0; i < sale.SaleDetails!.Count(); i++)
@@ -151,7 +188,7 @@ namespace PuntoVenta.Modules.Sales
                     worksheet.Cell(dataTable.Rows.Count + dto.Count + 1, 4).Value = sale.TotalPrice;
                     workbook.SaveAs(memoryStream);
 
-                    return File(memoryStream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",$"Cotizacion{Guid.NewGuid()}");
+                    return File(memoryStream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"Cotizacion{Guid.NewGuid()}");
                 }
             }
         }
