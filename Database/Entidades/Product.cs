@@ -28,7 +28,7 @@ namespace PuntoVenta.Database.Entidades
         public int BarCode { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
-        public decimal TotalSales { get; set; }
+        public decimal QuantitySale { get; set; }
         public virtual Category? Category { get; set; }
         public virtual UnitMeasurement? UnitMeasurement { get; set; }
         public virtual List<SaleDetail>? SaleDetails { get; set; }

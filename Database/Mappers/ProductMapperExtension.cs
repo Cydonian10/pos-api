@@ -22,9 +22,7 @@ namespace PuntoVenta.Database.Mappers
                 Name = dto.Name,
                 CategoryId = dto.CategoryId,
                 UnitMeasurementId = dto.UnitMeasurementId,
-                BarCode = dto.BarCode,
-                TotalSales = dto.TotalSales,
-             
+                BarCode = dto.BarCode,             
             };
         }
 
@@ -43,7 +41,7 @@ namespace PuntoVenta.Database.Mappers
                 CondicionDiscount= product.CondicionDiscount,
                 Name = product.Name,
                 BarCode = product.BarCode,
-                TotalSales = product.TotalSales,
+                QuantitySale = product.QuantitySale,
                 Category = new CategoryDto
                             {
                                 Id = product.Category!.Id,
@@ -73,7 +71,7 @@ namespace PuntoVenta.Database.Mappers
             product.CategoryId = dto.CategoryId;
             product.UnitMeasurementId = dto.UnitMeasurementId;
             product.BarCode = dto.BarCode;
-            product.TotalSales = dto.TotalSales;  
+            product.QuantitySale = product.QuantitySale;
 
             return product;
         }

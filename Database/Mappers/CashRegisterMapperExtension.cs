@@ -16,7 +16,8 @@ namespace PuntoVenta.Database.Mappers
                 InitialCash = (decimal)cashRegister.InitialCash!,
                 Name = cashRegister.Name,
                 Open = cashRegister.Open,
-                TotalCash = (decimal)cashRegister.TotalCash!
+                TotalCash = (decimal)cashRegister.TotalCash!,
+                UserId = cashRegister.UserId,
             };
         }
 
@@ -27,6 +28,7 @@ namespace PuntoVenta.Database.Mappers
                 InitialCash = dto.InitialCash,
                 Name = dto.Name,
                 Date = dto.Date,
+                UserId = null
             };
         }
 
@@ -41,6 +43,24 @@ namespace PuntoVenta.Database.Mappers
                 Date = entityDB.HistoryCashRegister.Date,   
                 EmployedId = entityDB.HistoryCashRegister.EmployedId,
                 NombreEmpleado = entityDB.EmployedName
+            };
+        }
+
+        public static CashRegister ToUpdateOpenDto(this CashRegister entity, OpenCashRegisterDto dto)
+        {
+            entity.InitialCash = dto.InitialCash;
+            entity.TotalCash = dto.InitialCash;
+            entity.Open = true;
+            entity.UserId = null;
+
+            return entity;
+        }
+
+        public static PatchCashRegisterDto ToPatchEntity(this CashRegister entity)
+        {
+            return new PatchCashRegisterDto
+            {
+                UserId = entity.UserId,
             };
         }
     }

@@ -49,10 +49,21 @@ namespace PuntoVenta.Modules.Products
         {
             var productQueryble = context.Products.AsQueryable();
 
+            if(dto == null)
+            {
+                return Ok();
+            }
+
             if( !string.IsNullOrEmpty(dto.Name) )
             {
                 productQueryble = productQueryble.Where(x => x.Name!.Contains(dto.Name));
             }
+
+            if( dto.BarCode != null)
+            {
+                productQueryble = productQueryble.Where(x => x.BarCode == dto.BarCode);
+            }
+
             if (dto.Stock != null)
             {
                 productQueryble = productQueryble.Where(x => x.Stock >= dto.Stock);

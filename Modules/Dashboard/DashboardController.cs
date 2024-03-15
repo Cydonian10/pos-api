@@ -33,34 +33,42 @@ namespace PuntoVenta.Modules.Dashboard
             var totalProducts = await context.Products.CountAsync();
 
             var productsOutOfStock = await context.Products
+                .Include(x => x.UnitMeasurement)
                 .Where(x => x.Stock < 30)
                 .Select(x => new DashboarProductDto
                 {
-                   Name = x.Name,
-                   Stock = x.Stock,
-                   TotalSales = x.TotalSales,
+                    Name = x.Name,
+                    Stock = x.Stock,
+                    QuantitySale = x.QuantitySale,
+                    UnitSymbol = x.UnitMeasurement!.Symbol
                 })
+                .OrderByDescending(x => x.Stock)
                 .ToListAsync();
 
             var top3SelledProduct = await context.Products
-                .OrderByDescending(p => p.TotalSales)
+                .Include(x => x.UnitMeasurement)
+                .OrderByDescending(p => p.QuantitySale)
                 .Take(4)
                 .Select(x => new DashboarProductDto
                 {
-                  Name = x.Name,
-                  Stock = x.Stock,
-                  TotalSales = x.TotalSales
+                    Name = x.Name,
+                    Stock = x.Stock,
+                    QuantitySale = x.QuantitySale,
+                    UnitSymbol = x.UnitMeasurement!.Symbol
+
                 })
             .ToListAsync();
 
             var top3leastSellingProducts = await context.Products
-              .OrderBy(p => p.TotalSales)
+              .Include(x => x.UnitMeasurement)
+              .OrderBy(p => p.QuantitySale)
               .Take(4)
               .Select(x => new DashboarProductDto
               {
-                Name = x.Name,
-                Stock =  x.Stock,
-                TotalSales = x.TotalSales
+                  Name = x.Name,
+                  Stock = x.Stock,
+                  QuantitySale = x.QuantitySale,
+                  UnitSymbol = x.UnitMeasurement!.Symbol
               })
             .ToListAsync();
 

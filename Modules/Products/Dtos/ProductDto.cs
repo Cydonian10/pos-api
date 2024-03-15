@@ -29,7 +29,7 @@ namespace PuntoVenta.Modules.Products.Dtos
         public int BarCode { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
-        public decimal TotalSales { get; set; }
+        public decimal QuantitySale { get; set; }
         public virtual CategoryDto? Category { get; set; }
         public virtual UnitDto? UnitMeasurement { get; set; }
    

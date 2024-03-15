@@ -8,6 +8,6 @@
         public DateTime Date { get; set; }
         public bool Open { get; set; }
         public decimal? TotalCash { get; set; }
-
+        public string? UserId { get; set; }
     }
 }

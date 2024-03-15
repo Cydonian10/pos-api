@@ -37,10 +37,11 @@ namespace PuntoVenta.Modules.Products.Dtos
         [Range(double.Epsilon, double.MaxValue)]
         public int UnitMeasurementId { get; set; }
 
+        [Required]
+        [Range(double.Epsilon, double.MaxValue)]
         public int BarCode { get; set; }
 
-        [Column(TypeName = "decimal(18,2)")]
-        public decimal TotalSales { get; set; }
+
     }
 }
 

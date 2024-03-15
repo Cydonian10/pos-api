@@ -5,24 +5,24 @@
 namespace PuntoVenta.Migrations
 {
     /// <inheritdoc />
-    public partial class UnitPrice : Migration
+    public partial class adduser : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<decimal>(
-                name: "UnitPrice",
-                table: "SaleDetails",
-                type: "decimal(18,2)",
-                nullable: true);
+            migrationBuilder.DropColumn(
+                name: "UsuarioId",
+                table: "CashRegisters");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "UnitPrice",
-                table: "SaleDetails");
+            migrationBuilder.AddColumn<string>(
+                name: "UsuarioId",
+                table: "CashRegisters",
+                type: "nvarchar(max)",
+                nullable: true);
         }
     }
 }

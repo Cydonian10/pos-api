@@ -69,7 +69,7 @@ namespace PuntoVenta.Modules.Sales
                             if (detail.Quantity <= product.Stock)
                             {
                                 product.Stock -= detail.Quantity;
-                                product.TotalSales += detail.Quantity;
+                                product.QuantitySale += detail.Quantity;
                             }
                             else
                             {

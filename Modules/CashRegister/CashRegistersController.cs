@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Azure;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PuntoVenta.Database;
@@ -73,6 +75,7 @@ namespace PuntoVenta.Modules.CashRegister
             };
 
             cashRegisterDB.Open = false;
+            cashRegisterDB.UserId = null;
 
             await context.HistoryCashRegisters.AddAsync(historyCashRegister);
             await context.SaveChangesAsync();
@@ -85,20 +88,56 @@ namespace PuntoVenta.Modules.CashRegister
             var cashRegisterDB = await context.CashRegisters.FirstOrDefaultAsync(x => x.Id == id);
 
             if (cashRegisterDB == null) { return NotFound(); };
-            if(cashRegisterDB.Open == true ) { return Conflict("La caja registradora ya esta abierto primero cierrela"); }
 
-            cashRegisterDB.InitialCash = dto.InitialCash;
-            cashRegisterDB.TotalCash = dto.InitialCash;
-            cashRegisterDB.Open = true;
+            if (cashRegisterDB.Open == true) { return Conflict("La caja registradora ya esta abierto primero cierrela"); }
+
+            if (!string.IsNullOrEmpty(cashRegisterDB.UserId))
+            {
+                return Conflict($"El usuario con id {cashRegisterDB.Id} ya esta trabajando aqui");
+            }
+
+            cashRegisterDB.ToUpdateOpenDto(dto);
 
             await context.SaveChangesAsync();
 
-            return cashRegisterDB.ToDto();  
+            return cashRegisterDB.ToDto();
+        }
+
+        [HttpPatch("{id:int}")]
+        public async Task<ActionResult> ActivarRegistarCashWithUser(int id, JsonPatchDocument<PatchCashRegisterDto> jsonPatchDto)
+        {
+            if (jsonPatchDto == null) { return BadRequest(); }
+
+            var registerCashDb = await context.CashRegisters.FirstOrDefaultAsync(x => x.Id == id);
+
+            if (registerCashDb == null) { return NotFound(); }
+
+            if (!string.IsNullOrEmpty(registerCashDb.UserId))
+            {
+                return Conflict($"El usuario con id {registerCashDb.Id} ya esta trabajando aqui");
+            }
+
+
+            var registerPatch = registerCashDb.ToPatchEntity();
+
+            jsonPatchDto.ApplyTo(registerPatch, ModelState);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            registerCashDb.UserId = registerPatch.UserId;
+            await context.SaveChangesAsync();
+
+            return NoContent();
+
         }
 
         [HttpGet("history/{id:int}")]
         [AllowAnonymous]
-        public async Task<ActionResult<List<CashRegisterHistoryDto>>> HisotryCashRegister([FromRoute] int id) {
+        public async Task<ActionResult<List<CashRegisterHistoryDto>>> HisotryCashRegister([FromRoute] int id)
+        {
             var cashRegisterDB = await context.HistoryCashRegisters
                 .Where(x => x.CashRegisterId == id)
                 .Select(h => new CashHistoryWithEmpleado
@@ -107,7 +146,7 @@ namespace PuntoVenta.Modules.CashRegister
                     EmployedName = h.Employed!.Name
                 }).ToListAsync();
 
-            return Ok(cashRegisterDB.Select( x => x.ToCashHistoryDto()).ToList());
+            return Ok(cashRegisterDB.Select(x => x.ToCashHistoryDto()).ToList());
         }
 
     }
