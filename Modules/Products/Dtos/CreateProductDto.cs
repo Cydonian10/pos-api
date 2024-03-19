@@ -18,7 +18,6 @@ namespace PuntoVenta.Modules.Products.Dtos
 
         [Required]
         public decimal PurchaseDesc { get; set; }
-        public string? Image { get; set; }
         public string? Type { get; set; }
         public string? Description { get; set; }
 
@@ -40,8 +39,8 @@ namespace PuntoVenta.Modules.Products.Dtos
         [Required]
         [Range(double.Epsilon, double.MaxValue)]
         public int BarCode { get; set; }
-
-
+         
+        public IFormFile? Image { get; set; }
     }
 }
 

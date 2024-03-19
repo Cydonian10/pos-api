@@ -1,5 +1,7 @@
 ﻿using DocumentFormat.OpenXml.InkML;
 using DocumentFormat.OpenXml.Wordprocessing;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +13,7 @@ namespace PuntoVenta.Modules.Dashboard
 {
     [Route("api/dashboard")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class DashboardController : ControllerBase
     {
         private readonly DataContext context;
@@ -21,6 +24,7 @@ namespace PuntoVenta.Modules.Dashboard
         }
 
         [HttpGet]
+        [Authorize(Policy = "VisualizarAdmin")]
         // Precio total del inventario al venderlo
         public async Task<ActionResult<DashboardDto>> GetDashboard()
         {

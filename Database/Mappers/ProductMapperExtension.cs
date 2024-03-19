@@ -42,6 +42,7 @@ namespace PuntoVenta.Database.Mappers
                 Name = product.Name,
                 BarCode = product.BarCode,
                 QuantitySale = product.QuantitySale,
+                Image = product.Image,
                 Category = new CategoryDto
                             {
                                 Id = product.Category!.Id,

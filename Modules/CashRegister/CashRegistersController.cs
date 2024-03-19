@@ -28,7 +28,7 @@ namespace PuntoVenta.Modules.CashRegister
         }
 
         [HttpGet]
-        [AllowAnonymous]
+        //[AllowAnonymous]
         public async Task<ActionResult<List<CashRegisterDto>>> List()
         {
             var cashRegistersDB = await context.CashRegisters.ToListAsync();
@@ -54,6 +54,24 @@ namespace PuntoVenta.Modules.CashRegister
             await context.SaveChangesAsync();
 
             return new CreatedAtRouteResult("ObtnerCashRegister", new { id = cashRegister.Id }, cashRegister.ToDto());
+        }
+
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult<CashRegisterDto>> Put([FromRoute] int id, [FromBody] UpdateCashrRegisterDto dto)
+        {
+            var cashRegister = await context.CashRegisters.FirstOrDefaultAsync(x => x.Id == id);
+            if (cashRegister == null) { return NotFound(new { message = "Cash Register not found" }); }
+            
+            cashRegister.Name = dto.Name;
+            //cashRegister.TotalCash = cashRegister.TotalCash;
+            //cashRegister.InitialCash = cashRegister.InitialCash;
+            //cashRegister.Date = cashRegister.Date;
+            //cashRegister.Open =cashRegister.Open;
+            cashRegister.UserId = dto.UserId;
+
+            await context.SaveChangesAsync();
+
+            return cashRegister.ToDto();
         }
 
         [HttpPut("close/{id:int}")]
@@ -103,29 +121,37 @@ namespace PuntoVenta.Modules.CashRegister
             return cashRegisterDB.ToDto();
         }
 
-        [HttpPatch("{id:int}")]
-        public async Task<ActionResult> ActivarRegistarCashWithUser(int id, JsonPatchDocument<PatchCashRegisterDto> jsonPatchDto)
+        [HttpPatch("{id:int}/user/{userId}")]
+        public async Task<ActionResult> ActivarRegistarCashWithUser(int id,string userId ,JsonPatchDocument<PatchCashRegisterDto> jsonPatchDto)
         {
             if (jsonPatchDto == null) { return BadRequest(); }
 
             var registerCashDb = await context.CashRegisters.FirstOrDefaultAsync(x => x.Id == id);
 
+
             if (registerCashDb == null) { return NotFound(); }
+
+            if (registerCashDb.Open == false) { return Conflict("La caja esta cerrada"); }
+
 
             if (!string.IsNullOrEmpty(registerCashDb.UserId))
             {
                 return Conflict($"El usuario con id {registerCashDb.Id} ya esta trabajando aqui");
             }
 
-
             var registerPatch = registerCashDb.ToPatchEntity();
+
+            var cashRegisterExisteWithUser = await context.CashRegisters.FirstOrDefaultAsync(x => x.UserId == userId);
+
+            if(cashRegisterExisteWithUser != null) { return Conflict(new {message = "Ya estas trabajando en una caja" }); }
+            
 
             jsonPatchDto.ApplyTo(registerPatch, ModelState);
 
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
-            }
+            }   
 
             registerCashDb.UserId = registerPatch.UserId;
             await context.SaveChangesAsync();

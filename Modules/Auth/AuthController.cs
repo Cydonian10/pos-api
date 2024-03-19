@@ -11,6 +11,7 @@ using System.Text;
 using PuntoVenta.Modules.Auth.Dtos;
 using Microsoft.EntityFrameworkCore;
 using PuntoVenta.Database.Mappers;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace PuntoVenta.Modules.Auth
 {
@@ -63,6 +64,31 @@ namespace PuntoVenta.Modules.Auth
             }
         }
 
+        [HttpPost("register-customer")]
+        public async Task<ActionResult<AuthRequestDto>> RegistrarCustomer(AuthRegisterDto authRegisterDto)
+        {
+            var userEntity = new User
+            {
+                UserName = authRegisterDto.Email,
+                Email = authRegisterDto.Email,
+                Salary = authRegisterDto.Salary,
+                Birthday = authRegisterDto.Birthday,
+                Name = authRegisterDto.Name,
+            };
+
+            var resultado = await userManager.CreateAsync(userEntity!, authRegisterDto.Password!);
+
+            if (resultado.Succeeded)
+            {
+
+                return await ConstruirToken(authRegisterDto);
+            }
+            else
+            {
+                return BadRequest(resultado.Errors);
+            }
+        }
+
         [HttpPost("login")]
         public async Task<ActionResult<AuthRequestDto>> Login(AuthLoginDto authLoginDto)
         {
@@ -84,6 +110,7 @@ namespace PuntoVenta.Modules.Auth
 
         }
 
+     
         private async Task<AuthRequestDto> ConstruirToken(IAuthCredencial authRegisterDto)
         {
             var claims = new List<Claim>
@@ -95,6 +122,7 @@ namespace PuntoVenta.Modules.Auth
             claims.Add(new Claim(ClaimTypes.NameIdentifier, identityUser!.Id));
             var claimDb = await userManager.GetClaimsAsync(identityUser!);
             claims.AddRange(claimDb);
+
             var rolesDb = await userManager.GetRolesAsync(identityUser!);
 
             foreach (var role in rolesDb)
@@ -105,7 +133,7 @@ namespace PuntoVenta.Modules.Auth
             var llave = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["llavejwt"]!));
             var creds = new SigningCredentials(llave, SecurityAlgorithms.HmacSha256);
 
-            var expiracion = DateTime.UtcNow.AddHours(1);
+            var expiracion = DateTime.UtcNow.AddDays(1);
 
             var securityToken = new JwtSecurityToken(issuer: null, audience: null, signingCredentials: creds, expires: expiracion,
                 claims: claims);

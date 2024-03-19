@@ -16,7 +16,7 @@ namespace PuntoVenta.Database.Mappers
             user.Name = dto.Name;
             user.UserName = dto.Email;
             user.Email = dto.Email;
-            user.PasswordHash = user.PasswordHash;
+            //user.PasswordHash = user.PasswordHash;
 
             return user;
         }
@@ -64,8 +64,19 @@ namespace PuntoVenta.Database.Mappers
                 Name = user.Name,
                 Age = age,
                 Salary = user.Salary,
+                Birthday = user.Birthday,
                 Roles = roles.ToList(),
-                Claims = claims.Select(c => new ClaimsDto { Typo = c.Type,Value = c.Value }).ToList(),
+                Claims = claims.Select(c => new ClaimsDto { Typo = c.Type, Value = c.Value }).ToList(),
+            };
+        }
+
+        public static CustomerDto ToCustomerDto(this User user)
+        {
+            return new CustomerDto
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email
             };
         }
     }

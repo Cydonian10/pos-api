@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PuntoVenta.Database;
 using PuntoVenta.Database.Entidades;
+using PuntoVenta.Services.StoreImage;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -62,6 +63,7 @@ builder.Services.AddDbContext<DataContext>((options) =>
 // * Services
 //builder.Services.AddSingleton<IAuthorizationHandler,EmployedHandler>();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddTransient<IStoreImageService,LocalStoreImageService>();
 
 
 // * Identity
@@ -99,10 +101,18 @@ builder.Services.AddAuthorization(options =>
         );
 
     options.AddPolicy(
+     "VisualizarAdmin",
+     policy =>
+         policy
+         .RequireClaim(ClaimTypes.Role, ["Admin"])
+     );
+
+
+    options.AddPolicy(
       "ManejadorVentas",
       policy =>
           policy
-          .RequireClaim(ClaimTypes.Role, ["Admin", "Empleado"])
+          .RequireClaim(ClaimTypes.Role, ["Empleado","Vendedor"])
       );
 
     options.AddPolicy(
@@ -132,6 +142,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles();
 
 app.UseCors();
 
