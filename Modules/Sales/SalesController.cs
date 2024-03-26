@@ -150,12 +150,34 @@ namespace PuntoVenta.Modules.Sales
             return Ok(saleDTO);
         }
 
-        [HttpDelete("{id:int}")]
-        public async Task<ActionResult> Delete([FromRoute] int id)
+        [HttpDelete("{id:int}/caja/{cajaId}")]
+        public async Task<ActionResult> Delete([FromRoute] int id, [FromRoute] int cajaId)
         {
-            var saleDb = await context.Sales.FirstOrDefaultAsync(x => x.Id == id);
+            var saleDb = await context.Sales.Include(x => x.SaleDetails).FirstOrDefaultAsync(x => x.Id == id);
 
             if (saleDb == null) { return NotFound(); }
+
+
+            foreach (var detail in saleDb.SaleDetails!)
+            {
+                var product = await context.Products.FindAsync(detail.ProductId);
+
+                if (product != null)
+                {
+
+                    product.Stock += detail.Quantity;
+                    product.QuantitySale -= detail.Quantity;
+
+                }
+            }
+
+            var cashRegisterDb = await context.CashRegisters.FirstOrDefaultAsync(x => x.Id == cajaId);
+
+           
+            if (cashRegisterDb != null)
+            {
+                cashRegisterDb!.TotalCash -= saleDb.TotalPrice;
+            }
 
             context.Remove(saleDb);
             await context.SaveChangesAsync();

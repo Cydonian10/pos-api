@@ -110,7 +110,7 @@ namespace PuntoVenta.Modules.Auth
 
         }
 
-     
+
         private async Task<AuthRequestDto> ConstruirToken(IAuthCredencial authRegisterDto)
         {
             var claims = new List<Claim>
