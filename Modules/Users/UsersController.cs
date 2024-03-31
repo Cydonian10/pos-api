@@ -174,7 +174,7 @@ namespace PuntoVenta.Modules.Users
                 UserName = authRegisterDto.Email,
                 Email = authRegisterDto.Email,
                 Salary = authRegisterDto.Salary,
-                Birthday = authRegisterDto.Birthday,
+                DateBirthday = authRegisterDto.DateBirthday,
                 Name = authRegisterDto.Name,
             };
 
@@ -207,7 +207,7 @@ namespace PuntoVenta.Modules.Users
                 UserName = authRegisterDto.Email,
                 Email = authRegisterDto.Email,
                 Salary = authRegisterDto.Salary,
-                Birthday = authRegisterDto.Birthday,
+                DateBirthday = authRegisterDto.DateBirthday,
                 Name = authRegisterDto.Name,
             };
 

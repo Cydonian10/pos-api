@@ -42,14 +42,7 @@ namespace PuntoVenta.Modules.Auth
         [HttpPost("register")]
         public async Task<ActionResult<AuthRequestDto>> Registrar(AuthRegisterDto authRegisterDto)
         {
-            var userEntity = new User
-            {
-                UserName = authRegisterDto.Email,
-                Email = authRegisterDto.Email,
-                Salary = authRegisterDto.Salary,
-                Birthday = authRegisterDto.Birthday,
-                Name = authRegisterDto.Name,
-            };
+            var userEntity = authRegisterDto.ToEntity();
 
             var resultado = await userManager.CreateAsync(userEntity!, authRegisterDto.Password!);
 
@@ -72,7 +65,7 @@ namespace PuntoVenta.Modules.Auth
                 UserName = authRegisterDto.Email,
                 Email = authRegisterDto.Email,
                 Salary = authRegisterDto.Salary,
-                Birthday = authRegisterDto.Birthday,
+                DateBirthday = authRegisterDto.DateBirthday,
                 Name = authRegisterDto.Name,
             };
 
@@ -118,12 +111,12 @@ namespace PuntoVenta.Modules.Auth
                 new Claim(ClaimTypes.Email, authRegisterDto.Email!),
             };
 
-            var identityUser = await userManager.FindByEmailAsync(authRegisterDto.Email!);
-            claims.Add(new Claim(ClaimTypes.NameIdentifier, identityUser!.Id));
-            var claimDb = await userManager.GetClaimsAsync(identityUser!);
+            var user = await userManager.FindByEmailAsync(authRegisterDto.Email!);
+            claims.Add(new Claim(ClaimTypes.NameIdentifier, user!.Id));
+            var claimDb = await userManager.GetClaimsAsync(user!);
             claims.AddRange(claimDb);
 
-            var rolesDb = await userManager.GetRolesAsync(identityUser!);
+            var rolesDb = await userManager.GetRolesAsync(user!);
 
             foreach (var role in rolesDb)
             {

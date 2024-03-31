@@ -8,10 +8,12 @@ namespace PuntoVenta.Database.Mappers
 {
     public static class UserMapperExtension
     {
+       
+
         public static User ToEntityUpdate(this User user, AuthRegisterDto dto)
         {
             user.Salary = dto.Salary;
-            user.Birthday = dto.Birthday;
+            user.DateBirthday = dto.DateBirthday;
             user.Email = dto.Email;
             user.Name = dto.Name;
             user.UserName = dto.Email;
@@ -31,10 +33,15 @@ namespace PuntoVenta.Database.Mappers
             };
         }
 
+        //public static User ToEntityCustomer()
+        //{
+
+        //}
+
         public static UserDto ToDto(this User user)
         {
-            int age = DateTime.Now.Year - user.Birthday.Year;
-            if (DateTime.Now < user.Birthday.AddYears(age))
+            int age = DateTime.Now.Year - user.DateBirthday.Year;
+            if (DateTime.Now < user.DateBirthday.AddYears(age))
             {
                 age--;
             }
@@ -51,8 +58,8 @@ namespace PuntoVenta.Database.Mappers
 
         public static UserWithRolesDto ToWithRolesDto(this User user, IList<string> roles, IList<Claim> claims)
         {
-            int age = DateTime.Now.Year - user.Birthday.Year;
-            if (DateTime.Now < user.Birthday.AddYears(age))
+            int age = DateTime.Now.Year - user.DateBirthday.Year;
+            if (DateTime.Now < user.DateBirthday.AddYears(age))
             {
                 age--;
             }
@@ -64,7 +71,7 @@ namespace PuntoVenta.Database.Mappers
                 Name = user.Name,
                 Age = age,
                 Salary = user.Salary,
-                Birthday = user.Birthday,
+                Birthday = user.DateBirthday,
                 Roles = roles.ToList(),
                 Claims = claims.Select(c => new ClaimsDto { Typo = c.Type, Value = c.Value }).ToList(),
             };

@@ -9,7 +9,8 @@ namespace PuntoVenta.Helpers.Extensions
             double quantity = await queryble.CountAsync();
             double quantityPages = Math.Ceiling(quantity / quantityRecordsPerPage);
 
-            httpContext.Response.Headers.Append("cantidadPaginas", quantityPages.ToString());
+            httpContext.Response.Headers.Append("totalRegistros", quantity.ToString());
+
         }
     }
 }

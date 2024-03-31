@@ -17,23 +17,21 @@ namespace PuntoVenta.Modules.Products.Dtos
         public decimal PurchasePrice { get; set; }
 
         [Required]
-        public decimal PurchaseDesc { get; set; }
-        public string? Type { get; set; }
         public string? Description { get; set; }
 
         [Required]
         public string? Size { get; set; }
-        public string? CondicionDiscount { get; set; }
 
         [Required]
         public string? Name { get; set; }
 
         [Required]
-        [Range(double.Epsilon, double.MaxValue)]
         public int CategoryId { get; set; }
 
         [Required]
-        [Range(double.Epsilon, double.MaxValue)]
+        public int BrandId { get; set; }
+
+        [Required]
         public int UnitMeasurementId { get; set; }
 
         [Required]

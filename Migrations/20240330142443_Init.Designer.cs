@@ -12,8 +12,8 @@ using PuntoVenta.Database;
 namespace PuntoVenta.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240314170530_usercashregister")]
-    partial class usercashregister
+    [Migration("20240330142443_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -163,6 +163,28 @@ namespace PuntoVenta.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("PuntoVenta.Database.Entidades.Brand", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Image")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Brands", (string)null);
+                });
+
             modelBuilder.Entity("PuntoVenta.Database.Entidades.CashRegister", b =>
                 {
                     b.Property<int>("Id")
@@ -189,9 +211,6 @@ namespace PuntoVenta.Migrations
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("UsuarioId")
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
@@ -216,6 +235,28 @@ namespace PuntoVenta.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories", (string)null);
+                });
+
+            modelBuilder.Entity("PuntoVenta.Database.Entidades.Discount", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("DiscountedPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("MinimumDiscountQuantity")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Discounts", (string)null);
                 });
 
             modelBuilder.Entity("PuntoVenta.Database.Entidades.HistoryCashRegister", b =>
@@ -284,11 +325,11 @@ namespace PuntoVenta.Migrations
                     b.Property<int>("BarCode")
                         .HasColumnType("int");
 
-                    b.Property<int>("CategoryId")
+                    b.Property<int>("BrandId")
                         .HasColumnType("int");
 
-                    b.Property<string>("CondicionDiscount")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -298,9 +339,6 @@ namespace PuntoVenta.Migrations
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("PurchaseDesc")
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("PurchasePrice")
                         .HasColumnType("decimal(18,2)");
@@ -317,19 +355,33 @@ namespace PuntoVenta.Migrations
                     b.Property<decimal>("Stock")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("Type")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("UnitMeasurementId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BrandId");
 
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("UnitMeasurementId");
 
                     b.ToTable("Products", (string)null);
+                });
+
+            modelBuilder.Entity("PuntoVenta.Database.Entidades.ProductDiscount", b =>
+                {
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DiscountId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProductId", "DiscountId");
+
+                    b.HasIndex("DiscountId");
+
+                    b.ToTable("ProductDiscount", (string)null);
                 });
 
             modelBuilder.Entity("PuntoVenta.Database.Entidades.Purchase", b =>
@@ -665,6 +717,12 @@ namespace PuntoVenta.Migrations
 
             modelBuilder.Entity("PuntoVenta.Database.Entidades.Product", b =>
                 {
+                    b.HasOne("PuntoVenta.Database.Entidades.Brand", "Brand")
+                        .WithMany("Products")
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("PuntoVenta.Database.Entidades.Category", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
@@ -677,9 +735,30 @@ namespace PuntoVenta.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Brand");
+
                     b.Navigation("Category");
 
                     b.Navigation("UnitMeasurement");
+                });
+
+            modelBuilder.Entity("PuntoVenta.Database.Entidades.ProductDiscount", b =>
+                {
+                    b.HasOne("PuntoVenta.Database.Entidades.Discount", "Discount")
+                        .WithMany("Products")
+                        .HasForeignKey("DiscountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PuntoVenta.Database.Entidades.Product", "Product")
+                        .WithMany("Discounts")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Discount");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("PuntoVenta.Database.Entidades.Purchase", b =>
@@ -752,6 +831,11 @@ namespace PuntoVenta.Migrations
                     b.Navigation("Sale");
                 });
 
+            modelBuilder.Entity("PuntoVenta.Database.Entidades.Brand", b =>
+                {
+                    b.Navigation("Products");
+                });
+
             modelBuilder.Entity("PuntoVenta.Database.Entidades.CashRegister", b =>
                 {
                     b.Navigation("Sales");
@@ -762,8 +846,15 @@ namespace PuntoVenta.Migrations
                     b.Navigation("Products");
                 });
 
+            modelBuilder.Entity("PuntoVenta.Database.Entidades.Discount", b =>
+                {
+                    b.Navigation("Products");
+                });
+
             modelBuilder.Entity("PuntoVenta.Database.Entidades.Product", b =>
                 {
+                    b.Navigation("Discounts");
+
                     b.Navigation("PurchaseDetails");
 
                     b.Navigation("SaleDetails");

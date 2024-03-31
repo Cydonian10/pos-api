@@ -6,6 +6,8 @@ using PuntoVenta.Database.Entidades;
 using PuntoVenta.Database.Mappers;
 using PuntoVenta.Helpers.Dtos;
 using PuntoVenta.Helpers.Extensions;
+using PuntoVenta.Modules.Brand.Dtos;
+using PuntoVenta.Modules.Discount.Dtos;
 using PuntoVenta.Modules.Products.Dtos;
 using PuntoVenta.Services.StoreImage;
 
@@ -26,16 +28,16 @@ namespace PuntoVenta.Modules.Products
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<ProductDto>>> List([FromQuery] PageDto pageDto)
+        public async Task<ActionResult<List<ProductDto>>> List([FromQuery] PaginationDto pageDto)
         {
             var queryble = context.Products
                 .Include(x => x.Category)
+                 .Include(x => x.Brand)
                 .Include(x => x.UnitMeasurement).AsQueryable();
+
             await HttpContext.InsertarParametrosPaginar(queryble, pageDto.quantityRecordsPerPage);
-            var total = await context.Products.CountAsync();
-            var totalPages = Math.Ceiling((decimal)total / pageDto.QuantityRecordsPerPage);
             var productsDB = await queryble.Paginar(pageDto).ToListAsync();
-            return Ok(new { totalPages, data = productsDB.Select(x => x.ToDto()).ToList() });
+            return productsDB.Select(x => x.ToDto()).ToList();
         }
 
         [HttpGet("{id:int}", Name = "ObtnerProduct")]
@@ -80,6 +82,7 @@ namespace PuntoVenta.Modules.Products
 
             var productsDb = await productQueryble
                                 .Include(x => x.Category)
+                                .Include(x => x.Brand)
                                 .Include(x => x.UnitMeasurement)
                                 .ToListAsync();
 
@@ -106,13 +109,38 @@ namespace PuntoVenta.Modules.Products
 
             await context.Products.AddAsync(product);
             await context.SaveChangesAsync();
-            var productDB = context.Products
+            var productDB = await context.Products
                 .Include(x => x.Category)
+                 .Include(x => x.Brand)
                 .Include(x => x.UnitMeasurement)
-                .FirstOrDefault(x => x.Id == product.Id);
+                .FirstOrDefaultAsync(x => x.Id == product.Id);
             var productDTO = productDB!.ToDto();
             return new CreatedAtRouteResult("ObtnerProduct", new { id = product.Id }, productDTO);
         }
+
+        [HttpPut("add-discounts/{id:int}")]
+        public async Task<ActionResult> AddDiscounts([FromRoute] int id, [FromBody] List<CreateDiscountDto> dto)
+        {
+            var productDB = await context.Products.Include(x => x.Discounts).FirstOrDefaultAsync(x => x.Id == id);
+
+            if (productDB == null) { return NotFound(new { msg = $"El producto con id: {id} no existe" }); }
+
+            productDB.ToEntityAddDiscounts(dto);
+
+            await context.SaveChangesAsync();
+
+            return Ok();
+
+        }
+
+        [HttpGet("{id:int}/discounts", Name = "ObtnerDisountsByProduct")]
+        public async Task<ActionResult<List<DiscountDto>>> getDiscountsByProduct([FromRoute] int id)
+        {
+            var discounts = await context.ProductDiscounts.Include(x => x.Discount).Where(x => x.ProductId == id).ToListAsync();
+
+            return discounts.Select(x => x.ToDiscountDto()).ToList();
+        }
+
 
         [HttpPut("{id:int}")]
         public async Task<ActionResult> Update([FromRoute] int id, [FromForm] CreateProductDto dto)
@@ -125,13 +153,14 @@ namespace PuntoVenta.Modules.Products
 
             if (dto.Image != null)
             {
-                using(var ms = new MemoryStream())
+                using (var ms = new MemoryStream())
                 {
                     await dto.Image.CopyToAsync(ms);
                     var contenido = ms.ToArray();
                     var extension = System.IO.Path.GetExtension(dto.Image.FileName).ToLower();
                     var contentType = dto.Image.ContentType;
-                    productDB.Image = await storeImage.SaveImage(contenido, extension, "Productos", contentType);
+
+                    productDB.Image = await storeImage.UpdateImage(contenido, extension, "Productos", contentType, productDB.Image!);
 
                 }
             }
@@ -140,6 +169,20 @@ namespace PuntoVenta.Modules.Products
 
             return Ok(productDB);
         }
+
+
+        [HttpDelete("discount/{id:int}")]
+        public async Task<ActionResult> DeleteDiscount([FromRoute] int id)
+        {
+            var discountDB = await context.Discounts.FirstOrDefaultAsync(x => x.Id == id);
+            if (discountDB == null) { return NotFound($"La producto con id:{id} no fue encontrada"); }
+
+            context.Discounts.Remove(discountDB);
+            await context.SaveChangesAsync();
+
+            return Ok(new { id });
+        }
+
 
         [HttpPatch("{id:int}")]
         public async Task<ActionResult> Path([FromRoute] int id, JsonPatchDocument<PatchProductDto> jsonPatchDto)

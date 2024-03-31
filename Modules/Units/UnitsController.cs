@@ -29,10 +29,20 @@ namespace PuntoVenta.Modules.Units
         public async Task<ActionResult<UnitDto>> GetOne([FromRoute] int id)
         {
             var unitDB = await context.UnitMeasurements.FindAsync(id);
-            if(unitDB == null) { return NotFound($"La unidad con id: {id} no fue encontrada"); }
+            if(unitDB == null) { return NotFound(new { msg = $"La unidad con id: {id} no fue encontrada" }); }
             var unitDto = unitDB.ToDto();
             return unitDto;
      
+        }
+
+        [HttpGet("{nombre}/find", Name = "ObtenerUnitByNombre")]
+        public async Task<ActionResult<UnitDto>> GetOneName([FromRoute] string nombre)
+        {
+            var unitDB = await context.UnitMeasurements.FirstOrDefaultAsync(x => x.Name == nombre); 
+            if (unitDB == null) { return NotFound(new { msg = $"La unidad con id: {nombre} no fue encontrada" }); }
+            var unitDto = unitDB.ToDto();
+            return unitDto;
+
         }
 
         [HttpGet("filter")]
@@ -64,7 +74,7 @@ namespace PuntoVenta.Modules.Units
         public async Task<ActionResult<UnitDto>> Update([FromRoute] int id, [FromBody] CreateUnitDto dto)
         {
             var unitDB = await context.UnitMeasurements.FindAsync(id);
-            if(unitDB == null) { return NotFound($"La unidad con id:{id} no fue encontrada"); }
+            if(unitDB == null) { return NotFound(new {msg = $"La unidad con id:{id} no fue encontrada" }); }
             unitDB.ToUpdateEntity(dto);
             await context.SaveChangesAsync();
            
@@ -75,8 +85,8 @@ namespace PuntoVenta.Modules.Units
         public async Task<ActionResult> Delete([FromRoute] int id)
         {
             var unitDB = await context.UnitMeasurements.FindAsync(id);
-            if (unitDB == null) { return NotFound($"La unidad con id:{id} no fue encontrada"); }
-            
+            if (unitDB == null) { return NotFound(new { msg = $"La unidad con id:{id} no fue encontrada" }); }
+
             context.UnitMeasurements.Remove(unitDB);
             await context.SaveChangesAsync();
             return Ok( new { IdEliminado = id });

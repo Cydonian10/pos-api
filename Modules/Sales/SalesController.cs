@@ -173,7 +173,7 @@ namespace PuntoVenta.Modules.Sales
 
             var cashRegisterDb = await context.CashRegisters.FirstOrDefaultAsync(x => x.Id == cajaId);
 
-           
+
             if (cashRegisterDb != null)
             {
                 cashRegisterDb!.TotalCash -= saleDb.TotalPrice;
@@ -183,6 +183,18 @@ namespace PuntoVenta.Modules.Sales
             await context.SaveChangesAsync();
 
             return Ok(new { id });
+        }
+
+        [HttpGet("ventas-fecha")]
+        public async Task<ActionResult> VentasUsuarioPorFecha(DateTime fechaInicio, DateTime fechaFinal, string usuarioId)
+        {
+            var sales =  await context.Sales.Where(sale => sale.Date >= fechaInicio && sale.Date <= fechaFinal && sale.EmployedId == usuarioId)
+                .ToListAsync();
+
+
+            var totalPrice = sales.Sum(x => x.TotalPrice);
+
+            return Ok(new { sales, totalPrice });
         }
 
         private FileResult GenerarExel(Sale sale, List<CrearteSaleDetailDto> dto)

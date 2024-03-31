@@ -21,7 +21,7 @@ namespace PuntoVenta.Modules.Categories
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<CategoryDto>>> List([FromQuery] PageDto pageDto)
+        public async Task<ActionResult<List<CategoryDto>>> List([FromQuery] PaginationDto pageDto)
         {
             var queryble = context.Categories.AsQueryable();
 
@@ -46,7 +46,7 @@ namespace PuntoVenta.Modules.Categories
                     })
                     .FirstOrDefaultAsync();
 
-            if (categoryDB == null) { return NotFound($"La unidad con id:{id} no fue encontrada"); }
+            if (categoryDB == null) { return NotFound(new {msg = $"La unidad con id:{id} no fue encontrada" }); }
             var categoryDTO = new CategoryWithProductsDto
             {
                 Id = categoryDB.Category.Id,
@@ -57,6 +57,15 @@ namespace PuntoVenta.Modules.Categories
             return Ok(categoryDTO);
         }
 
+        [HttpGet("{nombre}/find", Name = "ObtenerCategoryPorNombre")]
+        public async Task<ActionResult<CategoryDto>> GetOneName([FromRoute] string nombre)
+        {
+            var categoryDB = await context.Categories.FirstOrDefaultAsync(x => x.Name == nombre);
+
+            if (categoryDB == null) { return NotFound(new { msg = $"La categoria con nombre:{nombre} no fue encontrada" }); }
+          
+            return categoryDB.ToDto();
+        }
 
         [HttpGet("filter")]
         public async Task<ActionResult<List<CategoryDto>>> Filter([FromQuery] FilterCategoryDto dto)
@@ -88,7 +97,7 @@ namespace PuntoVenta.Modules.Categories
         public async Task<ActionResult<CategoryDto>> Update([FromRoute] int id, [FromBody] CreateCategoryDto dto)
         {
             var categoryDB = await context.Categories.FindAsync(id);
-            if (categoryDB == null) { return NotFound($"La unidad con id:{id} no fue encontrada"); }
+            if (categoryDB == null) { return NotFound(new { msg = $"La unidad con id:{id} no fue encontrada" }); }
 
             categoryDB.ToEntityUpdate(dto);
             await context.SaveChangesAsync();
@@ -100,7 +109,7 @@ namespace PuntoVenta.Modules.Categories
         public async Task<ActionResult<CategoryDto>> Delete([FromRoute] int id)
         {
             var categoryDB = await context.Categories.FindAsync(id);
-            if (categoryDB == null) { return NotFound($"La unidad con id:{id} no fue encontrada"); }
+            if (categoryDB == null) { return NotFound(new { msg = $"La unidad con id:{id} no fue encontrada" }); }
 
             context.Categories.Remove(categoryDB);
             await context.SaveChangesAsync();

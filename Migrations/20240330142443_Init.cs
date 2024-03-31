@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PuntoVenta.Migrations
 {
     /// <inheritdoc />
-    public partial class INit : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -66,20 +66,18 @@ namespace PuntoVenta.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CashRegisters",
+                name: "Brands",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    TotalCash = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    InitialCash = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Open = table.Column<bool>(type: "bit", nullable: false)
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Image = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CashRegisters", x => x.Id);
+                    table.PrimaryKey("PK_Brands", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -94,6 +92,21 @@ namespace PuntoVenta.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Categories", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Discounts",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DiscountedPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    MinimumDiscountQuantity = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Discounts", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -248,6 +261,29 @@ namespace PuntoVenta.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CashRegisters",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TotalCash = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    InitialCash = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Open = table.Column<bool>(type: "bit", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CashRegisters", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CashRegisters_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "HistoryCashRegisters",
                 columns: table => new
                 {
@@ -267,6 +303,71 @@ namespace PuntoVenta.Migrations
                         column: x => x.EmployedId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Purchase",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TotalPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Taxes = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    VaucherNumber = table.Column<int>(type: "int", nullable: false, defaultValueSql: "next value for dbo.Purchase_Id_seq"),
+                    SupplierId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Purchase", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Purchase_Suppliers_SupplierId",
+                        column: x => x.SupplierId,
+                        principalTable: "Suppliers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Products",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Stock = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    SalePrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    PurchasePrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Image = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Size = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    BarCode = table.Column<int>(type: "int", nullable: false),
+                    QuantitySale = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CategoryId = table.Column<int>(type: "int", nullable: false),
+                    UnitMeasurementId = table.Column<int>(type: "int", nullable: false),
+                    BrandId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Products", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Products_Brands_BrandId",
+                        column: x => x.BrandId,
+                        principalTable: "Brands",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Products_Categories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "Categories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Products_UnitMeasurements_UnitMeasurementId",
+                        column: x => x.UnitMeasurementId,
+                        principalTable: "UnitMeasurements",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -305,62 +406,25 @@ namespace PuntoVenta.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Purchase",
+                name: "ProductDiscount",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    TotalPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Taxes = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    VaucherNumber = table.Column<int>(type: "int", nullable: false, defaultValueSql: "next value for dbo.Purchase_Id_seq"),
-                    SupplierId = table.Column<int>(type: "int", nullable: false)
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    DiscountId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Purchase", x => x.Id);
+                    table.PrimaryKey("PK_ProductDiscount", x => new { x.ProductId, x.DiscountId });
                     table.ForeignKey(
-                        name: "FK_Purchase_Suppliers_SupplierId",
-                        column: x => x.SupplierId,
-                        principalTable: "Suppliers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Products",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Stock = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    SalePrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    PurchasePrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    PurchaseDesc = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Image = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Type = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Size = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CondicionDiscount = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CategoryId = table.Column<int>(type: "int", nullable: false),
-                    UnitMeasurementId = table.Column<int>(type: "int", nullable: false),
-                    BarCode = table.Column<int>(type: "int", nullable: false),
-                    QuantitySale = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Products", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Products_Categories_CategoryId",
-                        column: x => x.CategoryId,
-                        principalTable: "Categories",
+                        name: "FK_ProductDiscount_Discounts_DiscountId",
+                        column: x => x.DiscountId,
+                        principalTable: "Discounts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Products_UnitMeasurements_UnitMeasurementId",
-                        column: x => x.UnitMeasurementId,
-                        principalTable: "UnitMeasurements",
+                        name: "FK_ProductDiscount_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -464,9 +528,24 @@ namespace PuntoVenta.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CashRegisters_UserId",
+                table: "CashRegisters",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_HistoryCashRegisters_EmployedId",
                 table: "HistoryCashRegisters",
                 column: "EmployedId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductDiscount_DiscountId",
+                table: "ProductDiscount",
+                column: "DiscountId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Products_BrandId",
+                table: "Products",
+                column: "BrandId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Products_CategoryId",
@@ -544,6 +623,9 @@ namespace PuntoVenta.Migrations
                 name: "HistoryPriceProduct");
 
             migrationBuilder.DropTable(
+                name: "ProductDiscount");
+
+            migrationBuilder.DropTable(
                 name: "PurchaseDetail");
 
             migrationBuilder.DropTable(
@@ -551,6 +633,9 @@ namespace PuntoVenta.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "Discounts");
 
             migrationBuilder.DropTable(
                 name: "Purchase");
@@ -565,16 +650,19 @@ namespace PuntoVenta.Migrations
                 name: "Suppliers");
 
             migrationBuilder.DropTable(
+                name: "Brands");
+
+            migrationBuilder.DropTable(
                 name: "Categories");
 
             migrationBuilder.DropTable(
                 name: "UnitMeasurements");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "CashRegisters");
 
             migrationBuilder.DropTable(
-                name: "CashRegisters");
+                name: "AspNetUsers");
 
             migrationBuilder.DropSequence(
                 name: "MiEntidad_Id_seq",

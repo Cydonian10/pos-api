@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using PuntoVenta.Database.Entidades;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PuntoVenta.Database
@@ -23,7 +24,10 @@ namespace PuntoVenta.Database
         public DbSet<PurchaseDetail> PurchaseDetails { get; set; }
         public DbSet<CashRegister> CashRegisters { get; set; }
         public DbSet<HistoryCashRegister> HistoryCashRegisters { get; set; }
-
+        public DbSet<Brand> Brands { get; set; }
+        public DbSet<Discount> Discounts { get; set; }
+        public DbSet<ProductDiscount> ProductDiscounts { get; set; }
+        public DbSet<Customer> Customers { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Product>(e =>
@@ -32,7 +36,28 @@ namespace PuntoVenta.Database
                 e.HasKey("Id");
                 e.HasOne(e => e.UnitMeasurement).WithMany(e => e.Products).HasForeignKey(e => e.UnitMeasurementId);
                 e.HasOne(e => e.Category).WithMany(e => e.Products).HasForeignKey(e => e.CategoryId);
+                e.HasOne(e => e.Brand).WithMany(e => e.Products).HasForeignKey(e => e.BrandId);
+                //e.HasMany(e => e.Discounts).WithMany(e => e.Products).;
+            });
 
+            modelBuilder.Entity<Discount>(e =>
+            {
+                e.ToTable("Discounts");
+                e.HasKey("Id");
+            });
+
+            modelBuilder.Entity<ProductDiscount>(e =>
+            {
+                e.ToTable("ProductDiscount");
+                e.HasKey(e => new { e.ProductId, e.DiscountId });
+                e.HasOne(e => e.Product).WithMany(e => e.Discounts).HasForeignKey(e => e.ProductId);
+                e.HasOne(e => e.Discount).WithMany(e => e.Products).HasForeignKey(e => e.DiscountId);
+            });
+
+            modelBuilder.Entity<Brand>(e =>
+            {
+                e.ToTable("Brands");
+                e.HasKey("Id");
             });
 
             modelBuilder.Entity<Category>(e =>
@@ -109,6 +134,13 @@ namespace PuntoVenta.Database
                 e.HasKey("Id");
 
                 e.HasOne(e => e.Employed).WithMany(e => e.HistoryCashRegisters).HasForeignKey(e => e.EmployedId);
+            });
+
+            modelBuilder.Entity<Customer>(e =>
+            {
+                e.ToTable("Customers");
+                e.HasKey("Id");
+
             });
 
             base.OnModelCreating(modelBuilder);
