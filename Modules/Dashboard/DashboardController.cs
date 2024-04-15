@@ -12,8 +12,9 @@ using PuntoVenta.Modules.Dashboard.Dtos;
 namespace PuntoVenta.Modules.Dashboard
 {
     [Route("api/dashboard")]
-    [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(Roles = "admin")]
+    [ApiController]
     public class DashboardController : ControllerBase
     {
         private readonly DataContext context;
@@ -24,7 +25,7 @@ namespace PuntoVenta.Modules.Dashboard
         }
 
         [HttpGet]
-        [Authorize(Policy = "VisualizarAdmin")]
+        //[Authorize(Policy = "VisualizarAdmin")]
         // Precio total del inventario al venderlo
         public async Task<ActionResult<DashboardDto>> GetDashboard()
         {
@@ -36,23 +37,24 @@ namespace PuntoVenta.Modules.Dashboard
 
             var totalProducts = await context.Products.CountAsync();
 
-            var productsOutOfStock = await context.Products
-                .Include(x => x.UnitMeasurement)
-                .Where(x => x.Stock < 30)
-                .Select(x => new DashboarProductDto
-                {
-                    Name = x.Name,
-                    Stock = x.Stock,
-                    QuantitySale = x.QuantitySale,
-                    UnitSymbol = x.UnitMeasurement!.Symbol
-                })
-                .OrderByDescending(x => x.Stock)
-                .ToListAsync();
+            return new DashboardDto
+            {
+                TotalInventoryCost = totalInventoryCost,
+                TotalInventoryPrice = totalInventoryPrice,
+                TotalSalesPrice = totalSalesPrice,
+                TotalProducts = totalProducts,
+            };
+        }
 
+    
+        // Producto mas vendidos
+        [HttpGet("most-selled")]
+        public async Task<ActionResult> MostSelledProduct()
+        {
             var top3SelledProduct = await context.Products
                 .Include(x => x.UnitMeasurement)
                 .OrderByDescending(p => p.QuantitySale)
-                .Take(4)
+                .Take(10)
                 .Select(x => new DashboarProductDto
                 {
                     Name = x.Name,
@@ -63,6 +65,32 @@ namespace PuntoVenta.Modules.Dashboard
                 })
             .ToListAsync();
 
+            return Ok(top3SelledProduct);
+        }
+
+        // Ventas por semana
+        [HttpGet("sales-last-weak")]
+        public async Task<ActionResult> SalesLastWeak()
+        {
+            DateTime fechaActual = DateTime.Today;
+            DateTime fechaInicioSemanaPasada = fechaActual.AddDays(-7);
+
+            var sales = await context.Sales
+                .Where(sale => sale.Date >= fechaInicioSemanaPasada && sale.Date <= fechaActual).ToListAsync();
+
+            var salesByDay = sales!.GroupBy(sale => sale.Date.DayOfWeek)
+                .Select(group => new {
+                    Dia = group.Key.ToString(),
+                    TotalSale = group.Sum( sale => sale.TotalPrice)
+                }).ToList();
+
+            return Ok(salesByDay);
+                  
+        }
+
+        [HttpGet("least-sold-product")]
+        public async Task<ActionResult> LeastSoldProduct()
+        {
             var top3leastSellingProducts = await context.Products
               .Include(x => x.UnitMeasurement)
               .OrderBy(p => p.QuantitySale)
@@ -76,74 +104,47 @@ namespace PuntoVenta.Modules.Dashboard
               })
             .ToListAsync();
 
-            var query = from sale in context.Sales
-                        join user in context.Users on sale.CustomerId equals user.Id
-                        group sale by new { sale.CustomerId, user.Name } into g
+            return Ok(top3leastSellingProducts);
+        }
+
+        [HttpGet("top-sales")]
+        public async Task<ActionResult> GetBestClients()
+        {
+
+            var topSales = await (from sale in context.Sales
+                        join customer in context.Customers on sale.CustomerId equals customer.Id
+                        group sale by new { sale.CustomerId, customer.Name } into g
                         orderby g.Sum(s => s.TotalPrice) descending
                         select new DashboardCustomerDto
                         {
                             CustomerId = g.Key.CustomerId,
                             UserName = g.Key.Name,
                             TotalSales = g.Sum(s => s.TotalPrice)
-                        };
+                        }).Take(3).ToListAsync();
 
-            var topSales = query.Take(3).ToList();
 
-            return new DashboardDto
-            {
-                TotalInventoryCost = totalInventoryCost,
-                TotalInventoryPrice = totalInventoryPrice,
-                ProductsOutOfStock = productsOutOfStock,
-                Top3SelledProduct = top3SelledProduct,
-                Top3leastSellingProducts = top3leastSellingProducts,
-                TotalSalesPrice = totalSalesPrice,
-                TotalProducts = totalProducts,
-                TopSales = topSales
-
-            };
+            return Ok(topSales);    
         }
 
-        // Costo total del inventario
-        //public async Task<ActionResult> GetInventoryCost()
-        //{
-        //    throw new NotImplementedException();
-        //}
 
-        //// Producto mas vendidos
-        //public async Task<ActionResult> MostSelledProduct()
-        //{
-        //    throw new NotImplementedException();
-        //}
+        [HttpGet("products-low-stock")]
+        public async Task<ActionResult> ProductsLowInStock()
+        {
+            var productsOutOfStock = await context.Products
+                .Include(x => x.UnitMeasurement)
+                .Where(x => x.Stock < 30)
+                .Select(x => new DashboarProductDto
+                {
+                    Name = x.Name,
+                    Stock = x.Stock,
+                    QuantitySale = x.QuantitySale,
+                    UnitSymbol = x.UnitMeasurement!.Symbol
+                })
+                .OrderByDescending(x => x.Stock)
+                .ToListAsync();
 
-        //// Productos menos vendidos
-        //public async Task<ActionResult> LeastSoldProduct()
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public async Task<ActionResult> TotalSales()
-        //{
-        //    throw new NotImplementedException();
-
-        //}
-
-        //public async Task<ActionResult> TotalProducts()
-        //{
-        //    throw new NotImplementedException();
-
-        //}
-
-        //public async Task<ActionResult> GetBestClients()
-        //{
-        //    throw new NotImplementedException();
-
-        //}
-
-
-        //public async Task<ActionResult> ProductsLowInStock()
-        //{
-        //    throw new NotImplementedException();
-        //}
+            return Ok(productsOutOfStock);
+        }
 
     }
 }

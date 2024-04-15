@@ -5,6 +5,6 @@ namespace PuntoVenta.Modules.CashRegister.Queries
     public class CashHistoryWithEmpleado
     {
         public HistoryCashRegister? HistoryCashRegister { get; set; }
-        public string? EmployedName { get; set; }
+        public string? Empleado { get; set; }
     }
 }

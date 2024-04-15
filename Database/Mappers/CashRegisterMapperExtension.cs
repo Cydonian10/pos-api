@@ -25,10 +25,8 @@ namespace PuntoVenta.Database.Mappers
         {
             return new CashRegister
             {
-                InitialCash = dto.InitialCash,
                 Name = dto.Name,
                 Date = dto.Date,
-                UserId = null
             };
         }
 
@@ -42,7 +40,7 @@ namespace PuntoVenta.Database.Mappers
                 CashRegisterId = entityDB.HistoryCashRegister.CashRegisterId,
                 Date = entityDB.HistoryCashRegister.Date,   
                 EmployedId = entityDB.HistoryCashRegister.EmployedId,
-                NombreEmpleado = entityDB.EmployedName
+                Empleado = entityDB.Empleado
             };
         }
 

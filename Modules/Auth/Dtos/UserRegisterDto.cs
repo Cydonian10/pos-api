@@ -2,7 +2,7 @@
 
 namespace PuntoVenta.Modules.Auth.Dtos
 {
-    public class AuthRegisterDto : IAuthCredencial
+    public class UserRegisterDto : IAuthCredencial
     {
         [Required]
         public string? Email { get; set; }
@@ -14,6 +14,7 @@ namespace PuntoVenta.Modules.Auth.Dtos
         public decimal Salary { get; set; }
         public string? Phone { get; set; }
         public string? DNI { get; set; }
+        public bool Active { get; set; }
 
     }
 }

@@ -6,9 +6,9 @@ namespace PuntoVenta.Modules.Users.Dtos
 {
     
 
-    public class UserWithRolesDto : UserDto
-    {
-        public List<string>? Roles { get; set; }
-        public List<ClaimsDto>? Claims { get; set; }
-    }
+    //public class UserWithRolesDto : UserDto
+    //{
+    //    public List<string>? Roles { get; set; }
+    //    public List<ClaimsDto>? Claims { get; set; }
+    //}
 }

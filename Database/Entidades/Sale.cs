@@ -20,14 +20,14 @@ namespace PuntoVenta.Database.Entidades
         public decimal Taxes { get; set; }
         public DateTime Date { get; set; }
 
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int VaucherNumber { get; set; }
-        public string? CustomerId { get; set; }
-        public string? EmployedId { get; set; }
+        public int CustomerId { get; set; }
+        public string? userId { get; set; }
         public int? CashRegisterId { get; set; }
         public EStatusCompra? EStatusCompra { get; set; }
-        public User? Customer { get; set; }
-        public User? Employed { get; set; }
+        public Customer? Customer { get; set; }
+        public User? User { get; set; }
         public virtual CashRegister? CashRegister { get; set; }
         public virtual List<SaleDetail>? SaleDetails { get; set; }
     }

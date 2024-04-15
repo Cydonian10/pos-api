@@ -10,18 +10,19 @@ namespace PuntoVenta.Database.Mappers
             return new Sale
             {
                 Taxes = dto.Taxex,
-                Date = dto.Date,
+                Date = DateTime.Now,
                 CustomerId = dto.CustomerId,
                 CashRegisterId = dto.CashRegisterId,
-                EStatusCompra = dto.statusCompra,
+                EStatusCompra = dto.StatusCompra,
+                TotalPrice = dto.TotalPrice,
                 SaleDetails = dto.SaleDetails!.Select(
                     x => new SaleDetail
-                            {
-                                Quantity = x.Quantity,
-                                ProductId = x.ProductId,
-                                UnitPrice = x.UnitPrice,
-                                Descuento = x.Discount,
-                            }).ToList()
+                    {
+                        Quantity = x.Quantity,
+                        ProductId = x.Product!.Id,
+                        Descuento = x.Discount,
+                        SubTotal = x.SubTotal
+                    }).ToList()
             };
         }
 
@@ -35,10 +36,10 @@ namespace PuntoVenta.Database.Mappers
                 Taxes = sale.Taxes,
                 Date = sale.Date,
                 VaucherNumber = sale.VaucherNumber,
-                Customer = sale.Customer?.ToSaleDto(),
-                Employed = sale.Employed?.ToSaleDto(),
+                Customer = sale.Customer?.ToDto(),
+                Employed = sale.User?.ToSaleDto(),
                 CashRegister = sale.CashRegister?.ToDto(),
-                Products = sale.SaleDetails!.Select(x =>  x.ToSaleDetailDto()).ToList()
+                Products = sale.SaleDetails!.Select(x => x.ToSaleDetailDto()).ToList()
             };
         }
 
@@ -49,11 +50,7 @@ namespace PuntoVenta.Database.Mappers
                 Quantity = saleDetail.Quantity,
                 SubTotal = saleDetail.SubTotal,
                 Descuento = (decimal)saleDetail.Descuento!,
-                ProductStock = saleDetail.Product!.Stock,
-                ProductSalePrice = saleDetail.Product.SalePrice,
-                ProductSize = saleDetail.Product.Size,
-                ProductName = saleDetail.Product.Name,
-                ProductUnitSymbol = saleDetail.Product.UnitMeasurement!.Symbol
+                Product = saleDetail.Product!.ToDto(),
 
             };
         }

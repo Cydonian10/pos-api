@@ -1,4 +1,6 @@
 ﻿using DocumentFormat.OpenXml.Office2010.Excel;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +14,7 @@ using PuntoVenta.Services.StoreImage;
 namespace PuntoVenta.Modules.Brand
 {
     [Route("api/brand")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     public class BrandController : ControllerBase
     {
@@ -25,6 +28,7 @@ namespace PuntoVenta.Modules.Brand
         }
 
         [HttpGet]
+        [Authorize(Roles = "admin,vendedor")]
         public async Task<ActionResult<List<BrandDto>>> Get([FromQuery] PaginationDto paginationDto)
         {
             var queryble = context.Brands.AsQueryable();
@@ -38,6 +42,7 @@ namespace PuntoVenta.Modules.Brand
 
 
         [HttpGet("{id:int}", Name = "ObtenerBrand")]
+        [Authorize(Roles = "admin,vendedor")]
         public async Task<ActionResult<BrandDto>> Get([FromRoute] int id)
         {
             var brandDB = await context.Brands.FirstOrDefaultAsync(x => x.Id == id);
@@ -48,6 +53,7 @@ namespace PuntoVenta.Modules.Brand
         }
 
         [HttpGet("{nombre}/find")]
+        [Authorize(Roles = "admin,vendedor")]
         public async Task<ActionResult<BrandDto>> Get([FromRoute] string nombre)
         {
             var brandDB = await context.Brands.FirstOrDefaultAsync(x => x.Name == nombre);
@@ -58,6 +64,7 @@ namespace PuntoVenta.Modules.Brand
         }
 
         [HttpPost]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult> Create([FromForm] CreateBrandDto brandDto)
         {
             var brand = brandDto.ToEntity();
@@ -79,6 +86,7 @@ namespace PuntoVenta.Modules.Brand
         }
 
         [HttpPut("{id:int}")]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult<BrandDto>> Put([FromForm] CreateBrandDto brandDto, [FromRoute] int id)
         {
             var brandDB = await context.Brands.FirstOrDefaultAsync(x => x.Id == id);

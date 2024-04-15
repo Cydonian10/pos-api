@@ -16,7 +16,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers().AddNewtonsoftJson();
+builder.Services.AddControllers()
+    .AddNewtonsoftJson()
+    .AddJsonOptions((options) =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -63,7 +68,7 @@ builder.Services.AddDbContext<DataContext>((options) =>
 // * Services
 //builder.Services.AddSingleton<IAuthorizationHandler,EmployedHandler>();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddTransient<IStoreImageService,LocalStoreImageService>();
+builder.Services.AddTransient<IStoreImageService, LocalStoreImageService>();
 
 
 // * Identity
@@ -112,7 +117,7 @@ builder.Services.AddAuthorization(options =>
       "ManejadorVentas",
       policy =>
           policy
-          .RequireClaim(ClaimTypes.Role, ["Empleado","Vendedor"])
+          .RequireClaim(ClaimTypes.Role, ["Empleado", "Vendedor"])
       );
 
     options.AddPolicy(
@@ -129,7 +134,7 @@ builder.Services.AddCors(options =>
     {
         builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()
         .WithExposedHeaders(new string[] { "totalRegistros" });
-        
+
     });
 
 });

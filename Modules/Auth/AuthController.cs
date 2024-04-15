@@ -11,7 +11,6 @@ using System.Text;
 using PuntoVenta.Modules.Auth.Dtos;
 using Microsoft.EntityFrameworkCore;
 using PuntoVenta.Database.Mappers;
-using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace PuntoVenta.Modules.Auth
 {
@@ -40,41 +39,21 @@ namespace PuntoVenta.Modules.Auth
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<AuthRequestDto>> Registrar(AuthRegisterDto authRegisterDto)
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(Roles = "admin")]
+        public async Task<ActionResult<UserTokenDto>> Registrar(UserRegisterDto userRegisterDto)
         {
-            var userEntity = authRegisterDto.ToEntity();
+            var userEntity = userRegisterDto.ToEntity();
 
-            var resultado = await userManager.CreateAsync(userEntity!, authRegisterDto.Password!);
+            var resultado = await userManager.CreateAsync(userEntity!, userRegisterDto.Password!);
 
             if (resultado.Succeeded)
             {
 
-                return await ConstruirToken(authRegisterDto);
-            }
-            else
-            {
-                return BadRequest(resultado.Errors);
-            }
-        }
+                var userToken = await ConstruirToken(userRegisterDto);
+                userToken.User = userEntity.ToDto();
+                return userToken;
 
-        [HttpPost("register-customer")]
-        public async Task<ActionResult<AuthRequestDto>> RegistrarCustomer(AuthRegisterDto authRegisterDto)
-        {
-            var userEntity = new User
-            {
-                UserName = authRegisterDto.Email,
-                Email = authRegisterDto.Email,
-                Salary = authRegisterDto.Salary,
-                DateBirthday = authRegisterDto.DateBirthday,
-                Name = authRegisterDto.Name,
-            };
-
-            var resultado = await userManager.CreateAsync(userEntity!, authRegisterDto.Password!);
-
-            if (resultado.Succeeded)
-            {
-
-                return await ConstruirToken(authRegisterDto);
             }
             else
             {
@@ -83,7 +62,7 @@ namespace PuntoVenta.Modules.Auth
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<AuthRequestDto>> Login(AuthLoginDto authLoginDto)
+        public async Task<ActionResult<UserTokenDto>> Login(UserLoginDto authLoginDto)
         {
             var resultado = await signInManager.PasswordSignInAsync(
                 authLoginDto.Email!,
@@ -104,7 +83,7 @@ namespace PuntoVenta.Modules.Auth
         }
 
 
-        private async Task<AuthRequestDto> ConstruirToken(IAuthCredencial authRegisterDto)
+        private async Task<UserTokenDto> ConstruirToken(IAuthCredencial authRegisterDto)
         {
             var claims = new List<Claim>
             {
@@ -131,7 +110,7 @@ namespace PuntoVenta.Modules.Auth
             var securityToken = new JwtSecurityToken(issuer: null, audience: null, signingCredentials: creds, expires: expiracion,
                 claims: claims);
 
-            return new AuthRequestDto()
+            return new UserTokenDto()
             {
                 Token = new JwtSecurityTokenHandler().WriteToken(securityToken),
                 Expiración = expiracion
@@ -139,7 +118,7 @@ namespace PuntoVenta.Modules.Auth
         }
 
         [HttpPost("asignar-claim")]
-        public async Task<ActionResult> AsignarClaims(AuthAddRolDto authAddRolDto)
+        public async Task<ActionResult> AsignarClaims(UserAddRolDto authAddRolDto)
         {
             var user = await userManager.FindByEmailAsync(authAddRolDto.Email!);
 
@@ -154,7 +133,7 @@ namespace PuntoVenta.Modules.Auth
         }
 
         [HttpPost("remove-claim")]
-        public async Task<ActionResult> RemoveClaims(AuthAddRolDto authAddRolDto)
+        public async Task<ActionResult> RemoveClaims(UserAddRolDto authAddRolDto)
         {
             var user = await userManager.FindByEmailAsync(authAddRolDto.Email!);
 
@@ -170,14 +149,14 @@ namespace PuntoVenta.Modules.Auth
 
 
         [HttpPost("asignar-rol")]
-        public async Task<ActionResult> AsignarRol(AuthAddRolDto authAddRolDto)
+        public async Task<ActionResult> AsignarRol(UserAddRolDto userAddRolDto)
         {
-            var user = await userManager.FindByEmailAsync(authAddRolDto.Email!);
+            var user = await userManager.FindByEmailAsync(userAddRolDto.Email!);
 
             if (user == null) { return NotFound(); }
 
 
-            foreach (var rol in authAddRolDto.Roles!)
+            foreach (var rol in userAddRolDto.Roles!)
             {
                 var roleExist = await roleManager.RoleExistsAsync(rol);
 
@@ -193,7 +172,7 @@ namespace PuntoVenta.Modules.Auth
         }
 
         [HttpPost("remove-rol")]
-        public async Task<ActionResult> RemoveRol(AuthAddRolDto authAddRolDto)
+        public async Task<ActionResult> RemoveRol(UserAddRolDto authAddRolDto)
         {
             var user = await userManager.FindByEmailAsync(authAddRolDto.Email!);
             if (user == null) { return NotFound(); }
@@ -213,6 +192,8 @@ namespace PuntoVenta.Modules.Auth
 
             var usuarioDb = await context.Users.FirstOrDefaultAsync(x => x.Id == usuarioId);
 
+            if (usuarioDb == null) { return NotFound(new { msg = "Usuario no encontrado" }); }
+
             var userDto = usuarioDb!.ToDto();
 
             var roles = await userManager.GetRolesAsync(usuarioDb!);
@@ -226,8 +207,104 @@ namespace PuntoVenta.Modules.Auth
                 claimsDto.Add(new ClaimsDto { Typo = claim.Type, Value = claim.Value });
             }
 
-            return Ok(new { Usuario = userDto, Roles = roles, Claims = claimsDto });
+            return Ok(usuarioDb.ToProfileDto(roles, claimsDto));
         }
 
+        [HttpGet("users")]
+        public async Task<ActionResult<List<UserDto>>> GetUserWithRol()
+        {
+
+            var usersInRole = await context.Users.ToListAsync();
+
+            return usersInRole.Select(x => x.ToDto()).ToList();
+        }
+
+        [HttpGet("roles")]
+        public async Task<ActionResult<List<string>>> GetRoles()
+        {
+
+            var roles = await context.Roles.Select(x => x.Name).ToListAsync();
+
+            return roles!;
+        }
+
+        [HttpGet("users/{id}")]
+        public async Task<ActionResult<UserDto>> GetUser([FromRoute] string id)
+        {
+
+            var user = await context.Users.FirstOrDefaultAsync(x => x.Id == id);
+
+            if (user == null) { return NotFound(new { msg = "Usuario no encontrado" }); }
+
+
+            return user.ToDto();
+        }
+
+        [HttpGet("filter")]
+        public async Task<ActionResult<List<UserDto>>> FilterUser([FromQuery] string rol)
+        {
+            var usersInRole = await userManager.GetUsersInRoleAsync(rol);
+
+            return usersInRole.Select(x => x.ToDto()).ToList();
+        }
+
+        [HttpGet("{Id}/roles")]
+        public async Task<ActionResult> GetRolesByUser([FromRoute] string id)
+        {
+            var userDB = await context.Users.FirstOrDefaultAsync(x => x.Id == id);
+            if (userDB == null) { return NotFound(new { msg = "Usuario no encontrado" }); }
+            var roles = await userManager.GetRolesAsync(userDB);
+            return Ok(roles);
+        }
+
+        [HttpGet("app-init")]
+        public async Task<ActionResult> InitApp()
+        {
+            var appInit = await context.AppInit.FirstOrDefaultAsync(x => x.Id == 1);
+
+            if (appInit is null) { return Ok(new { Msg = "No hay inicio de aplicacion" }); }
+
+            if (appInit.Count > 0) { return Ok(new { msg = "Ya inicio la app" }); }
+
+            return Ok(new { Msg = "Iniciar la App" });
+
+        }
+
+
+        [HttpPost("app-init")]
+        public async Task<ActionResult> CreateUserAdmin(UserRegisterDto userRegisterDto)
+        {
+           
+            var appInit = await context.AppInit.FirstOrDefaultAsync(x => x.Id == 1);
+
+            // context tabla uppinico > 0 entonces esto
+            if (appInit is null) { return Ok(new { Msg = "No hay inicio de aplicacion" }); }    
+
+            if (appInit.Count > 0) { return Ok(new { Msg = "Ya inicio la app" }); }
+
+           
+            var userEntity = userRegisterDto!.ToEntity();
+            userEntity.Active = true;
+
+            var resultado = await userManager.CreateAsync(userEntity!, userRegisterDto!.Password!);
+
+            if (resultado.Succeeded)
+            {
+                //context tabla appincio 
+                // +1
+                appInit.Count = 1;
+                await userManager.AddToRoleAsync(userEntity, "admin");
+                await context.SaveChangesAsync();
+                var userToken = await ConstruirToken(userRegisterDto);
+                userToken.User = userEntity.ToDto();
+                return Ok(userToken);
+
+            }
+            else
+            {
+                return BadRequest(resultado.Errors);
+            }
+        }
+        
     }
 }

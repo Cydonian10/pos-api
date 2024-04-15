@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PuntoVenta.Database;
 using PuntoVenta.Database.Mappers;
@@ -10,6 +12,7 @@ using PuntoVenta.Modules.Products.Dtos;
 namespace PuntoVenta.Modules.Categories
 {
     [Route("api/categories")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     public class CategoriesController : ControllerBase
     {
@@ -21,6 +24,7 @@ namespace PuntoVenta.Modules.Categories
         }
 
         [HttpGet]
+        [Authorize(Roles = "admin,vendedor")]
         public async Task<ActionResult<List<CategoryDto>>> List([FromQuery] PaginationDto pageDto)
         {
             var queryble = context.Categories.AsQueryable();
@@ -30,7 +34,9 @@ namespace PuntoVenta.Modules.Categories
             return categoriesDB.Select(x => x.ToDto()).ToList();
         }
 
+
         [HttpGet("{id:int}", Name = "ObtenerCategory")]
+        [Authorize(Roles = "admin,vendedor")]
         public async Task<ActionResult> GetOne([FromRoute] int id)
         {
             var categoryDB = await context.Categories
@@ -58,6 +64,7 @@ namespace PuntoVenta.Modules.Categories
         }
 
         [HttpGet("{nombre}/find", Name = "ObtenerCategoryPorNombre")]
+        [Authorize(Roles = "admin,vendedor")]
         public async Task<ActionResult<CategoryDto>> GetOneName([FromRoute] string nombre)
         {
             var categoryDB = await context.Categories.FirstOrDefaultAsync(x => x.Name == nombre);
@@ -68,6 +75,7 @@ namespace PuntoVenta.Modules.Categories
         }
 
         [HttpGet("filter")]
+        [Authorize(Roles = "admin,vendedor")]
         public async Task<ActionResult<List<CategoryDto>>> Filter([FromQuery] FilterCategoryDto dto)
         {
             var categoryQueryble = context.Categories.AsQueryable();
@@ -83,6 +91,7 @@ namespace PuntoVenta.Modules.Categories
 
 
         [HttpPost]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult> Create([FromBody] CreateCategoryDto dto)
         {
             var category = dto.ToEntity();
@@ -94,6 +103,7 @@ namespace PuntoVenta.Modules.Categories
         }
 
         [HttpPut("{id:int}")]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult<CategoryDto>> Update([FromRoute] int id, [FromBody] CreateCategoryDto dto)
         {
             var categoryDB = await context.Categories.FindAsync(id);
@@ -106,6 +116,7 @@ namespace PuntoVenta.Modules.Categories
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult<CategoryDto>> Delete([FromRoute] int id)
         {
             var categoryDB = await context.Categories.FindAsync(id);

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.JsonPatch;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PuntoVenta.Database;
@@ -15,6 +17,7 @@ using PuntoVenta.Services.StoreImage;
 namespace PuntoVenta.Modules.Products
 {
     [Route("api/products")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     public class ProductsController : ControllerBase
     {
@@ -28,6 +31,7 @@ namespace PuntoVenta.Modules.Products
         }
 
         [HttpGet]
+        [Authorize(Roles = "admin,vendedor")]
         public async Task<ActionResult<List<ProductDto>>> List([FromQuery] PaginationDto pageDto)
         {
             var queryble = context.Products
@@ -41,9 +45,12 @@ namespace PuntoVenta.Modules.Products
         }
 
         [HttpGet("{id:int}", Name = "ObtnerProduct")]
+        [Authorize(Roles = "admin,vendedor")]
         public async Task<ActionResult<ProductDto>> GetOne([FromRoute] int id)
         {
-            var product = await context.Products.FirstOrDefaultAsync(x => x.Id == id);
+            var product = await context.Products.Include(x => x.Category)
+                                .Include(x => x.Brand)
+                                .Include(x => x.UnitMeasurement).FirstOrDefaultAsync(x => x.Id == id);
 
             if (product == null) { return NotFound($"El producto con id: {id} no existe"); }
 
@@ -51,6 +58,7 @@ namespace PuntoVenta.Modules.Products
         }
 
         [HttpGet("filter")]
+        [Authorize(Roles = "admin,vendedor")]
         public async Task<ActionResult<List<ProductDto>>> Filter([FromQuery] FilterProductDto dto)
         {
             var productQueryble = context.Products.AsQueryable();
@@ -90,6 +98,7 @@ namespace PuntoVenta.Modules.Products
         }
 
         [HttpPost]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult> Create([FromForm] CreateProductDto dto)
         {
             var product = dto.ToEntity();
@@ -119,13 +128,14 @@ namespace PuntoVenta.Modules.Products
         }
 
         [HttpPut("add-discounts/{id:int}")]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult> AddDiscounts([FromRoute] int id, [FromBody] List<CreateDiscountDto> dto)
         {
             var productDB = await context.Products.Include(x => x.Discounts).FirstOrDefaultAsync(x => x.Id == id);
 
             if (productDB == null) { return NotFound(new { msg = $"El producto con id: {id} no existe" }); }
 
-            productDB.ToEntityAddDiscounts(dto);
+            var product = productDB.ToEntityAddDiscounts(dto);
 
             await context.SaveChangesAsync();
 
@@ -134,6 +144,7 @@ namespace PuntoVenta.Modules.Products
         }
 
         [HttpGet("{id:int}/discounts", Name = "ObtnerDisountsByProduct")]
+        [Authorize(Roles = "admin,vendedor")]
         public async Task<ActionResult<List<DiscountDto>>> getDiscountsByProduct([FromRoute] int id)
         {
             var discounts = await context.ProductDiscounts.Include(x => x.Discount).Where(x => x.ProductId == id).ToListAsync();
@@ -143,11 +154,25 @@ namespace PuntoVenta.Modules.Products
 
 
         [HttpPut("{id:int}")]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult> Update([FromRoute] int id, [FromForm] CreateProductDto dto)
         {
             var productDB = await context.Products.FirstOrDefaultAsync(x => x.Id == id);
 
             if (productDB == null) { return NotFound($"El producto con id: {id} no existe"); }
+
+            if (productDB.SalePrice != dto.SalePrice)
+            {
+                var historyProduct = new HistoryPriceProduct
+                {
+                    ProductId = id,
+                    Date = DateTime.Now,
+                    OldPrice = productDB.SalePrice,
+                    Name = productDB.Name
+                };
+
+                await context.HistoryPriceProducts.AddAsync(historyProduct);
+            }
 
             productDB.ToEntityUpdate(dto);
 
@@ -172,6 +197,7 @@ namespace PuntoVenta.Modules.Products
 
 
         [HttpDelete("discount/{id:int}")]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult> DeleteDiscount([FromRoute] int id)
         {
             var discountDB = await context.Discounts.FirstOrDefaultAsync(x => x.Id == id);
@@ -185,6 +211,7 @@ namespace PuntoVenta.Modules.Products
 
 
         [HttpPatch("{id:int}")]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult> Path([FromRoute] int id, JsonPatchDocument<PatchProductDto> jsonPatchDto)
         {
             if (jsonPatchDto == null) { return BadRequest(); }
@@ -222,6 +249,7 @@ namespace PuntoVenta.Modules.Products
 
 
         [HttpDelete("{id:int}")]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult> Delete([FromRoute] int id)
         {
             var productDB = await context.Products.FirstOrDefaultAsync(x => x.Id == id);
@@ -235,6 +263,7 @@ namespace PuntoVenta.Modules.Products
 
 
         [HttpGet("history/{id:int}")]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult> GetHistoryProducts([FromRoute] int id)
         {
             var historyProductsDB = await context.HistoryPriceProducts

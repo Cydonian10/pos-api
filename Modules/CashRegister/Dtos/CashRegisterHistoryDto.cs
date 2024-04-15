@@ -10,6 +10,6 @@ namespace PuntoVenta.Modules.CashRegister.Dtos
         public decimal TotalCash { get; set; }
         public string? EmployedId { get; set; }
         public DateTime Date { get; set; }
-        public string? NombreEmpleado { get; set; }
+        public string? Empleado { get; set; }
     }
 }

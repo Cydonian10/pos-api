@@ -15,8 +15,9 @@ namespace PuntoVenta.Database.Mappers
                 PurchaseDetails = dto.Details!.Select(x => new PurchaseDetail
                 {
                     Quantity = x.Quantity,
-                    ProductId = x.ProductId,
-                    PurchasePrice = x.PurchasePrice,
+                    ProductId = x.Product!.Id,
+                    SubTotal = x.SubTotal,
+                    PurchasePrice = x.PurchasePrice
                 }).ToList(),
             };
         }

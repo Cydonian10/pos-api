@@ -14,7 +14,7 @@ namespace PuntoVenta.Database.Entidades
 
         public DateTime Date { get; set; }
 
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int VaucherNumber { get; set; }
 
         public int SupplierId { get; set; }

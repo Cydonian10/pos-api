@@ -9,6 +9,7 @@ namespace PuntoVenta.Database.Mappers
         {
             return new DiscountDto
             {
+                Id = productDiscount.Discount!.Id,
                 Name = productDiscount.Discount!.Name,
                 DiscountedPrice = productDiscount.Discount.DiscountedPrice,
                 MinimumDiscountQuantity = productDiscount.Discount.MinimumDiscountQuantity

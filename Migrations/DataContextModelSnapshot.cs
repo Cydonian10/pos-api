@@ -22,11 +22,6 @@ namespace PuntoVenta.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.HasSequence<int>("MiEntidad_Id_seq", "dbo")
-                .StartsAt(100L);
-
-            modelBuilder.HasSequence<int>("Purchase_Id_seq", "dbo");
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -160,6 +155,22 @@ namespace PuntoVenta.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("PuntoVenta.Database.Entidades.AppInit", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Count")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AppInit", (string)null);
+                });
+
             modelBuilder.Entity("PuntoVenta.Database.Entidades.Brand", b =>
                 {
                     b.Property<int>("Id")
@@ -234,6 +245,34 @@ namespace PuntoVenta.Migrations
                     b.ToTable("Categories", (string)null);
                 });
 
+            modelBuilder.Entity("PuntoVenta.Database.Entidades.Customer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DNI")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phone")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Points")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Customers", (string)null);
+                });
+
             modelBuilder.Entity("PuntoVenta.Database.Entidades.Discount", b =>
                 {
                     b.Property<int>("Id")
@@ -254,6 +293,61 @@ namespace PuntoVenta.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Discounts", (string)null);
+                });
+
+            modelBuilder.Entity("PuntoVenta.Database.Entidades.Egresos", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CashRegisterId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Egreso")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Monto")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CashRegisterId");
+
+                    b.ToTable("Egresos", (string)null);
+                });
+
+            modelBuilder.Entity("PuntoVenta.Database.Entidades.Empresa", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Image")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RUC")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Empresa", (string)null);
                 });
 
             modelBuilder.Entity("PuntoVenta.Database.Entidades.HistoryCashRegister", b =>
@@ -402,9 +496,7 @@ namespace PuntoVenta.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("VaucherNumber")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValueSql("next value for dbo.Purchase_Id_seq");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -456,17 +548,14 @@ namespace PuntoVenta.Migrations
                     b.Property<int?>("CashRegisterId")
                         .HasColumnType("int");
 
-                    b.Property<string>("CustomerId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
                     b.Property<int?>("EStatusCompra")
                         .HasColumnType("int");
-
-                    b.Property<string>("EmployedId")
-                        .HasColumnType("nvarchar(450)");
 
                     b.Property<decimal>("Taxes")
                         .HasColumnType("decimal(18,2)");
@@ -475,9 +564,10 @@ namespace PuntoVenta.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("VaucherNumber")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValueSql("next value for dbo.MiEntidad_Id_seq");
+                        .HasColumnType("int");
+
+                    b.Property<string>("userId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
@@ -485,7 +575,7 @@ namespace PuntoVenta.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.HasIndex("EmployedId");
+                    b.HasIndex("userId");
 
                     b.ToTable("Sales", (string)null);
                 });
@@ -511,9 +601,6 @@ namespace PuntoVenta.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("SubTotal")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("UnitPrice")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -577,12 +664,19 @@ namespace PuntoVenta.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Birthday")
-                        .HasColumnType("datetime2");
+                    b.Property<bool>("Active")
+                        .HasColumnType("bit");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DNI")
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
+
+                    b.Property<DateTime>("DateBirthday")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -598,7 +692,8 @@ namespace PuntoVenta.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -610,6 +705,10 @@ namespace PuntoVenta.Migrations
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(9)
+                        .HasColumnType("nvarchar(9)");
 
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
@@ -703,11 +802,23 @@ namespace PuntoVenta.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("PuntoVenta.Database.Entidades.Egresos", b =>
+                {
+                    b.HasOne("PuntoVenta.Database.Entidades.CashRegister", "CashRegister")
+                        .WithMany("Egresos")
+                        .HasForeignKey("CashRegisterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CashRegister");
+                });
+
             modelBuilder.Entity("PuntoVenta.Database.Entidades.HistoryCashRegister", b =>
                 {
                     b.HasOne("PuntoVenta.Database.Entidades.User", "Employed")
                         .WithMany("HistoryCashRegisters")
-                        .HasForeignKey("EmployedId");
+                        .HasForeignKey("EmployedId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Employed");
                 });
@@ -717,19 +828,19 @@ namespace PuntoVenta.Migrations
                     b.HasOne("PuntoVenta.Database.Entidades.Brand", "Brand")
                         .WithMany("Products")
                         .HasForeignKey("BrandId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("PuntoVenta.Database.Entidades.Category", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("PuntoVenta.Database.Entidades.UnitMeasurement", "UnitMeasurement")
                         .WithMany("Products")
                         .HasForeignKey("UnitMeasurementId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Brand");
@@ -744,13 +855,13 @@ namespace PuntoVenta.Migrations
                     b.HasOne("PuntoVenta.Database.Entidades.Discount", "Discount")
                         .WithMany("Products")
                         .HasForeignKey("DiscountId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("PuntoVenta.Database.Entidades.Product", "Product")
                         .WithMany("Discounts")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Discount");
@@ -763,7 +874,7 @@ namespace PuntoVenta.Migrations
                     b.HasOne("PuntoVenta.Database.Entidades.Supplier", "Supplier")
                         .WithMany("Purchases")
                         .HasForeignKey("SupplierId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Supplier");
@@ -774,13 +885,13 @@ namespace PuntoVenta.Migrations
                     b.HasOne("PuntoVenta.Database.Entidades.Product", "Product")
                         .WithMany("PurchaseDetails")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("PuntoVenta.Database.Entidades.Purchase", "Purchase")
                         .WithMany("PurchaseDetails")
                         .HasForeignKey("PurchaseId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Product");
@@ -792,21 +903,25 @@ namespace PuntoVenta.Migrations
                 {
                     b.HasOne("PuntoVenta.Database.Entidades.CashRegister", "CashRegister")
                         .WithMany("Sales")
-                        .HasForeignKey("CashRegisterId");
+                        .HasForeignKey("CashRegisterId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("PuntoVenta.Database.Entidades.User", "Customer")
-                        .WithMany("SaleCustomer")
-                        .HasForeignKey("CustomerId");
+                    b.HasOne("PuntoVenta.Database.Entidades.Customer", "Customer")
+                        .WithMany("Shopping")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.HasOne("PuntoVenta.Database.Entidades.User", "Employed")
-                        .WithMany("SaleEmployed")
-                        .HasForeignKey("EmployedId");
+                    b.HasOne("PuntoVenta.Database.Entidades.User", "User")
+                        .WithMany("Sales")
+                        .HasForeignKey("userId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("CashRegister");
 
                     b.Navigation("Customer");
 
-                    b.Navigation("Employed");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("PuntoVenta.Database.Entidades.SaleDetail", b =>
@@ -835,12 +950,19 @@ namespace PuntoVenta.Migrations
 
             modelBuilder.Entity("PuntoVenta.Database.Entidades.CashRegister", b =>
                 {
+                    b.Navigation("Egresos");
+
                     b.Navigation("Sales");
                 });
 
             modelBuilder.Entity("PuntoVenta.Database.Entidades.Category", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("PuntoVenta.Database.Entidades.Customer", b =>
+                {
+                    b.Navigation("Shopping");
                 });
 
             modelBuilder.Entity("PuntoVenta.Database.Entidades.Discount", b =>
@@ -881,9 +1003,7 @@ namespace PuntoVenta.Migrations
                 {
                     b.Navigation("HistoryCashRegisters");
 
-                    b.Navigation("SaleCustomer");
-
-                    b.Navigation("SaleEmployed");
+                    b.Navigation("Sales");
                 });
 #pragma warning restore 612, 618
         }

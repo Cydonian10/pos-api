@@ -13,14 +13,14 @@ namespace PuntoVenta.Database.Entidades
         public string? Name { get; set; }
         public DateTime DateBirthday { get; set; }
 
-        [StringLength(maximumLength: 7, MinimumLength = 7 ,ErrorMessage = "El campo {0} debe tener 8 caracteres")]
+        [StringLength(maximumLength: 8, MinimumLength = 8 ,ErrorMessage = "El campo {0} debe tener 8 caracteres")]
         public string? DNI { get; set; }
         
         [StringLength(maximumLength: 9, MinimumLength = 9 ,ErrorMessage = "El campo {0} debe tener 9 caracteres")]
         public string? Phone { get; set; }
         // public string Avatar { get; set; }
-        public virtual List<Sale>? SaleCustomer { get; set; }
-        public virtual List<Sale>? SaleEmployed { get; set; }
+        public virtual List<Sale>? Sales { get; set; }
         public virtual List<HistoryCashRegister>? HistoryCashRegisters { get; set; }
+        public bool Active { get; set; }
     }
 }

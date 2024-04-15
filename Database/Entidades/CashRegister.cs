@@ -17,5 +17,6 @@ namespace PuntoVenta.Database.Entidades
         public string? UserId { get; set; }
         public User? User { get; set; }
         public virtual List<Sale>? Sales { get; set; }
+        public virtual List<Egresos>? Egresos { get; set; }
     }
 }
