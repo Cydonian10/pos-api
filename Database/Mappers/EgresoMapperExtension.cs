@@ -10,7 +10,7 @@ namespace PuntoVenta.Database.Mappers
             return new Egresos
             {
                 CashRegisterId = createEgresoDto.CashRegisterId,
-                CreateDate = createEgresoDto.CreateDate,
+                CreateDate = DateTime.Now,
                 Egreso = createEgresoDto.Egreso,
                 Monto = createEgresoDto.Monto,  
                 Name = createEgresoDto.Name  
